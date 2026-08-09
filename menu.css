@@ -1,0 +1,826 @@
+/* ============================================================
+   ÚLTIMA LÍNEA — PANTALLA DE INICIO
+   ------------------------------------------------------------
+   Mismo criterio que hud.css: nada de neón. Esto es un puesto
+   abandonado. Las placas están abolladas y oxidadas, los rótulos
+   pintados a plantilla y medio comidos, hay cinta adhesiva
+   sujetando lo que ya no aguanta y sangre seca que nadie limpió.
+   La luz es de bombilla sucia, no de pantalla.
+
+   Se carga DESPUÉS de style.css y ANTES de hud.css.
+   ============================================================ */
+
+:root {
+  --olive:      #6f8442;
+  --olive-dim:  #4b5a2c;
+  --steel-hi:   #4a4c44;
+  --steel:      #33352e;
+  --steel-lo:   #1c1e19;
+  --steel-deep: #0f100d;
+  --rust:       #a5522a;
+  --rust-dark:  #6b3418;
+  --gore:       #7a1f1f;
+  --alert:      #c23a3a;
+  --stencil:    #cfc4a6;
+  --stencil-lo: #8d846c;
+}
+
+/* ---- el menú es su propia capa, hermana de #overlay ---- */
+#menuScreen {
+  position: absolute;
+  inset: 0;
+  z-index: 22;
+  width: 1000px;
+  height: 600px;
+  overflow: hidden;
+  background: #070806;
+}
+
+#menuScreen.hidden { display: none; }
+
+/* botón fantasma que game.js necesita encontrar al cargar */
+.bootStub { display: none !important; }
+
+#menuCanvas {
+  position: absolute;
+  top: 0; left: 0;
+  width: 1000px;
+  height: 600px;
+  display: block;
+  pointer-events: none;
+  image-rendering: pixelated;
+}
+
+/* cristal sucio: polvo, arañazos y sombra en los bordes.
+   Sin líneas de barrido: eso era una pantalla, esto es aire con ceniza. */
+#menuVignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  background:
+    linear-gradient(103deg, transparent 17%, rgba(255,255,255,0.022) 17.2%, transparent 17.6%),
+    linear-gradient(77deg,  transparent 43%, rgba(255,255,255,0.018) 43.2%, transparent 43.5%),
+    linear-gradient(96deg,  transparent 72%, rgba(0,0,0,0.2) 72.2%, transparent 72.8%),
+    radial-gradient(ellipse 30% 22% at 78% 12%, rgba(120,58,24,0.1), transparent 70%),
+    radial-gradient(ellipse at 50% 52%, transparent 38%, rgba(0,0,0,0.62) 100%);
+}
+
+#menuUI {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+}
+
+/* ============================================================
+   LOGO — chapa de señal abollada
+   ============================================================ */
+#logoWrap {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 420px;
+}
+
+#logoSvg {
+  display: block;
+  width: 420px;
+  height: 196px;
+  /* sombra dura proyectada, no halo de color */
+  filter: drop-shadow(0 5px 7px rgba(0,0,0,0.85));
+}
+
+#logoSvg .logoTag {
+  font-family: 'Courier New', monospace;
+  font-size: 8.5px;
+  font-weight: bold;
+  letter-spacing: 3.4px;
+  fill: rgba(180,170,140,0.5);
+}
+
+/* ============================================================
+   BOTÓN CENTRAL — chapa gruesa remachada, con sangre encima
+   ============================================================ */
+#menuScreen #btnPlayMain {
+  position: absolute;
+  top: 232px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 320px;
+  height: 92px;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  overflow: hidden;
+  cursor: pointer;
+  font-family: 'Courier New', monospace;
+  text-shadow: none;
+  /* recorte irregular: chapa cortada a mano */
+  clip-path: polygon(0 15px, 17px 0, calc(100% - 8px) 0, 100% 13px,
+                     100% calc(100% - 17px), calc(100% - 19px) 100%, 12px 100%, 0 calc(100% - 9px));
+  background:
+    /* rayones cruzados */
+    linear-gradient(101deg, transparent 24%, rgba(255,255,255,0.055) 24.3%, transparent 24.9%),
+    linear-gradient(79deg,  transparent 58%, rgba(0,0,0,0.3) 58.2%, transparent 58.9%),
+    linear-gradient(107deg, transparent 81%, rgba(255,255,255,0.035) 81.2%, transparent 81.7%),
+    /* óxido comiendo las esquinas bajas */
+    radial-gradient(ellipse 70px 26px at 5% 96%, rgba(140,68,28,0.45), transparent 72%),
+    radial-gradient(ellipse 50px 20px at 96% 6%, rgba(120,58,24,0.35), transparent 72%),
+    /* pintura oliva desgastada */
+    linear-gradient(180deg, rgba(111,132,66,0.2), rgba(0,0,0,0.32)),
+    linear-gradient(178deg, var(--steel-hi), var(--steel) 46%, var(--steel-deep));
+  box-shadow:
+    inset 0 2px 0 rgba(210,200,175,0.15),
+    inset 0 -4px 0 rgba(0,0,0,0.85),
+    inset 0 0 40px rgba(0,0,0,0.5),
+    0 9px 20px rgba(0,0,0,0.75);
+  transition: transform 0.1s ease, filter 0.16s ease, box-shadow 0.16s ease;
+}
+
+/* remaches gastados en las cuatro esquinas */
+#menuScreen #btnPlayMain::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 13px 15px, rgba(200,192,170,0.34) 0 1.8px, rgba(0,0,0,0.65) 2px 3.2px, transparent 3.4px),
+    radial-gradient(circle at calc(100% - 13px) 15px, rgba(200,192,170,0.34) 0 1.8px, rgba(0,0,0,0.65) 2px 3.2px, transparent 3.4px),
+    radial-gradient(circle at 13px calc(100% - 15px), rgba(200,192,170,0.34) 0 1.8px, rgba(0,0,0,0.65) 2px 3.2px, transparent 3.4px),
+    radial-gradient(circle at calc(100% - 13px) calc(100% - 15px), rgba(200,192,170,0.34) 0 1.8px, rgba(0,0,0,0.65) 2px 3.2px, transparent 3.4px);
+}
+
+/* la capa que antes era el barrido de luz ahora es un manchón de sangre seca */
+#menuScreen #btnPlayMain .plateScan {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  animation: none;
+  background:
+    radial-gradient(ellipse 34px 15px at 82% 22%, rgba(122,31,31,0.5), transparent 68%),
+    radial-gradient(ellipse 18px 9px at 90% 40%, rgba(96,22,22,0.42), transparent 68%),
+    radial-gradient(ellipse 8px 5px at 74% 38%, rgba(122,31,31,0.4), transparent 70%),
+    radial-gradient(ellipse 5px 3px at 68% 15%, rgba(96,22,22,0.34), transparent 70%),
+    /* churretón que baja desde la mancha */
+    linear-gradient(180deg, transparent 30%, rgba(90,20,20,0.28) 30%, transparent 62%);
+  background-repeat: no-repeat;
+}
+
+#menuScreen #btnPlayMain .plateFace {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  height: 100%;
+}
+
+#menuScreen #btnPlayMain .plateRow {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+}
+
+#menuScreen #btnPlayMain .playIcon {
+  width: 19px; height: 19px;
+  fill: #b9c98d;
+  filter: drop-shadow(0 1px 0 rgba(0,0,0,0.9));
+  transition: transform 0.16s ease;
+}
+
+/* rótulo pintado a plantilla, con la pintura comida por arriba */
+#menuScreen #btnPlayMain .plateLabel {
+  font-size: 27px;
+  font-weight: bold;
+  letter-spacing: 10px;
+  text-indent: 10px;
+  color: var(--stencil);
+  text-shadow: 0 2px 0 rgba(0,0,0,0.9), 0 3px 6px rgba(0,0,0,0.6);
+}
+
+#menuScreen #btnPlayMain .plateSub {
+  font-size: 9px;
+  font-weight: bold;
+  letter-spacing: 3.4px;
+  color: rgba(150,145,120,0.7);
+  text-shadow: 0 1px 0 rgba(0,0,0,0.9);
+}
+
+#menuScreen #btnPlayMain:hover,
+#menuScreen #btnPlayMain:focus-visible {
+  transform: translateX(-50%) translateY(-2px);
+  filter: brightness(1.3) saturate(1.1);
+  outline: none;
+  box-shadow:
+    inset 0 2px 0 rgba(210,200,175,0.2),
+    inset 0 -4px 0 rgba(0,0,0,0.85),
+    inset 0 0 40px rgba(0,0,0,0.4),
+    0 13px 26px rgba(0,0,0,0.8);
+}
+
+#menuScreen #btnPlayMain:hover .playIcon { transform: translateX(4px); }
+
+#menuScreen #btnPlayMain:active {
+  transform: translateX(-50%) translateY(3px);
+  filter: brightness(0.72);
+  box-shadow: inset 0 5px 14px rgba(0,0,0,0.9);
+}
+
+/* ============================================================
+   COLUMNAS DE MÓDULOS — chapitas atornilladas
+   ============================================================ */
+.menuCol {
+  position: absolute;
+  top: 238px;
+  width: 208px;
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+}
+#menuColLeft  { left: 46px; }
+#menuColRight { right: 46px; }
+
+.menuColTitle {
+  font-size: 8px;
+  font-weight: bold;
+  letter-spacing: 3.2px;
+  color: rgba(150,145,120,0.6);
+  text-shadow: 0 1px 0 rgba(0,0,0,0.9);
+  padding-bottom: 3px;
+  border-bottom: 1px solid rgba(0,0,0,0.6);
+  box-shadow: 0 1px 0 rgba(210,200,175,0.06);
+}
+#menuColRight .menuColTitle { text-align: right; }
+
+.menuBtn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: 100%;
+  height: 60px;
+  padding: 0 12px;
+  border: none;
+  cursor: pointer;
+  font-family: 'Courier New', monospace;
+  text-align: left;
+  clip-path: polygon(0 9px, 10px 0, calc(100% - 4px) 0, 100% 7px,
+                     100% calc(100% - 10px), calc(100% - 11px) 100%, 6px 100%, 0 calc(100% - 5px));
+  background:
+    linear-gradient(103deg, transparent 28%, rgba(255,255,255,0.045) 28.3%, transparent 28.8%),
+    linear-gradient(78deg,  transparent 65%, rgba(0,0,0,0.28) 65.2%, transparent 65.8%),
+    radial-gradient(ellipse 30px 12px at 5% 92%, rgba(140,68,28,0.4), transparent 72%),
+    linear-gradient(180deg, rgba(255,255,255,0.04), rgba(0,0,0,0.3)),
+    linear-gradient(178deg, var(--steel), #191c15);
+  box-shadow:
+    inset 0 1px 0 rgba(210,200,175,0.11),
+    inset 0 -2px 0 rgba(0,0,0,0.8),
+    0 3px 8px rgba(0,0,0,0.6);
+  transition: transform 0.11s ease, filter 0.16s ease;
+}
+
+#menuColRight .menuBtn {
+  flex-direction: row-reverse;
+  text-align: right;
+  clip-path: polygon(0 7px, 4px 0, calc(100% - 10px) 0, 100% 9px,
+                     100% calc(100% - 5px), calc(100% - 6px) 100%, 11px 100%, 0 calc(100% - 10px));
+}
+
+.menuBtn .mbIcon {
+  flex-shrink: 0;
+  width: 34px; height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.34);
+  border: none;
+  border-radius: 0;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.65), inset 0 1px 0 rgba(210,200,175,0.08);
+}
+.menuBtn .mbIcon svg { width: 21px; height: 21px; fill: #b08a52; opacity: 0.8; }
+
+.menuBtn .mbText { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.menuBtn .mbText b {
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--stencil-lo);
+  text-shadow: 0 1px 0 rgba(0,0,0,0.9);
+}
+.menuBtn .mbText i {
+  font-style: normal;
+  font-size: 8.5px;
+  letter-spacing: 0.5px;
+  color: rgba(130,126,105,0.72);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* tornillo gastado en la esquina */
+.menuBtn::after {
+  content: '';
+  position: absolute;
+  right: 7px; top: 7px;
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background:
+    linear-gradient(120deg, rgba(200,192,170,0.38), rgba(60,55,45,0.9)),
+    radial-gradient(circle, rgba(150,140,120,0.6), rgba(30,28,22,0.9));
+  box-shadow: 0 1px 0 rgba(0,0,0,0.8);
+}
+#menuColRight .menuBtn::after { right: auto; left: 7px; }
+
+.menuBtn:hover, .menuBtn:focus-visible {
+  transform: translateY(-2px);
+  filter: brightness(1.32);
+  outline: none;
+}
+.menuBtn:hover .mbIcon svg { opacity: 1; fill: var(--rust); }
+.menuBtn:hover .mbText b { color: var(--stencil); }
+
+.menuBtn:active { transform: translateY(2px); filter: brightness(0.75); }
+
+/* al pulsar un módulo cerrado: la chapa traquetea en sus tornillos */
+.menuBtn.shake { animation: chapaSuelta 0.34s ease; }
+@keyframes chapaSuelta {
+  0%,100% { transform: translate(0,0) rotate(0deg); }
+  20%     { transform: translate(-3px,1px) rotate(-0.5deg); }
+  45%     { transform: translate(3px,-1px) rotate(0.4deg); }
+  70%     { transform: translate(-2px,0) rotate(-0.2deg); }
+}
+
+/* ============================================================
+   PIE + AVISO
+   ============================================================ */
+#menuFooter {
+  position: absolute;
+  bottom: 10px;
+  left: 0; right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 22px;
+}
+
+#menuScreen .linkBtn {
+  margin: 0;
+  color: rgba(140,136,112,0.7);
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-shadow: 0 1px 0 rgba(0,0,0,0.9);
+  text-decoration: none;
+  border-bottom: 1px dashed rgba(140,136,112,0.3);
+  padding-bottom: 1px;
+}
+#menuScreen .linkBtn:hover { color: var(--stencil); border-bottom-color: rgba(207,196,166,0.5); }
+
+#menuVer {
+  font-size: 9px;
+  font-weight: bold;
+  letter-spacing: 2.4px;
+  color: rgba(120,116,96,0.42);
+  text-shadow: 0 1px 0 rgba(0,0,0,0.9);
+}
+
+/* aviso: etiqueta de cartón sujeta con cinta */
+#menuToast {
+  position: absolute;
+  bottom: 46px;
+  left: 50%;
+  transform: translate(-50%, 8px);
+  padding: 9px 16px;
+  font-size: 10px;
+  font-weight: bold;
+  letter-spacing: 1.5px;
+  color: #c0a077;
+  text-shadow: 0 1px 0 rgba(0,0,0,0.9);
+  background:
+    radial-gradient(ellipse 24px 10px at 8% 88%, rgba(140,68,28,0.35), transparent 74%),
+    linear-gradient(178deg, #33302a, #1a1814);
+  box-shadow: inset 0 1px 0 rgba(210,200,175,0.1), inset 0 0 0 1px rgba(0,0,0,0.7), 0 4px 10px rgba(0,0,0,0.7);
+  clip-path: polygon(0 4px, 7px 0, calc(100% - 3px) 0, 100% 5px,
+                     100% calc(100% - 4px), calc(100% - 8px) 100%, 4px 100%, 0 calc(100% - 6px));
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+#menuToast.show { opacity: 1; transform: translate(-50%, 0); }
+
+/* ============================================================
+   BRIEFING — hoja de órdenes clavada en un tablón
+   ============================================================ */
+#menuScreen #helpDetails {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 30px;
+  background: rgba(5,6,4,0.88);
+  backdrop-filter: blur(3px) saturate(0.5);
+  -webkit-backdrop-filter: blur(3px) saturate(0.5);
+}
+#menuScreen #helpDetails.hidden { display: none; }
+
+#menuScreen #helpDetails .briefCard {
+  position: relative;
+  max-width: 620px;
+  max-height: 100%;
+  overflow-y: auto;
+  /* el body lleva touch-action:none para el juego; aquí se devuelve
+     el arrastre vertical para poder leer el briefing en móvil */
+  touch-action: pan-y;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: #43463d rgba(0,0,0,0.55);
+  padding: 24px 28px;
+  clip-path: polygon(0 12px, 13px 0, calc(100% - 7px) 0, 100% 11px,
+                     100% calc(100% - 14px), calc(100% - 15px) 100%, 9px 100%, 0 calc(100% - 8px));
+  background:
+    linear-gradient(99deg,  transparent 21%, rgba(255,255,255,0.03) 21.2%, transparent 21.7%),
+    linear-gradient(82deg,  transparent 66%, rgba(0,0,0,0.26) 66.2%, transparent 66.8%),
+    radial-gradient(ellipse 80px 34px at 3% 97%, rgba(140,68,28,0.3), transparent 74%),
+    radial-gradient(ellipse 40px 18px at 92% 8%, rgba(122,31,31,0.22), transparent 72%),
+    linear-gradient(180deg, rgba(255,255,255,0.04), rgba(0,0,0,0.3)),
+    linear-gradient(178deg, #333629, #1a1d15);
+  box-shadow:
+    inset 0 1px 0 rgba(210,200,175,0.12),
+    inset 0 0 50px rgba(0,0,0,0.7),
+    0 16px 40px rgba(0,0,0,0.85);
+}
+/* cinta adhesiva en dos esquinas */
+#menuScreen #helpDetails .briefCard::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(-45deg, transparent calc(100% - 36px), rgba(188,180,158,0.15) calc(100% - 36px), rgba(188,180,158,0.15) calc(100% - 22px), transparent calc(100% - 22px)),
+    linear-gradient(135deg, transparent calc(100% - 32px), rgba(188,180,158,0.12) calc(100% - 32px), rgba(188,180,158,0.12) calc(100% - 20px), transparent calc(100% - 20px));
+}
+#menuScreen #helpDetails h3 {
+  font-size: 13px;
+  font-weight: bold;
+  letter-spacing: 4px;
+  color: var(--stencil);
+  text-shadow: 0 2px 0 rgba(0,0,0,0.9);
+  margin-bottom: 13px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(0,0,0,0.6);
+  box-shadow: 0 1px 0 rgba(210,200,175,0.07);
+}
+#menuScreen #helpDetails p {
+  max-width: none;
+  margin: 0 0 10px;
+  font-size: 11px;
+  line-height: 1.85;
+  color: rgba(158,154,130,0.85);
+  text-align: left;
+}
+#menuScreen #helpDetails p:last-child { margin-bottom: 0; }
+#menuScreen #helpDetails p b  { color: var(--stencil); }
+#menuScreen #helpDetails p .h { color: #d9a24a; }
+#menuScreen #helpDetails p .b { color: var(--alert); }
+#menuScreen #helpDetails p .c { color: #8fae7a; }
+
+/* barra del briefing: misma guía hundida que el resto */
+#menuScreen #helpDetails .briefCard::-webkit-scrollbar { width: 11px; background: transparent; }
+#menuScreen #helpDetails .briefCard::-webkit-scrollbar-track {
+  background:
+    repeating-linear-gradient(180deg, rgba(150,120,40,0.07) 0 7px, transparent 7px 14px),
+    linear-gradient(90deg, rgba(0,0,0,0.75), rgba(0,0,0,0.42) 45%, rgba(0,0,0,0.75));
+  box-shadow: inset 1px 0 0 rgba(0,0,0,0.85), inset -1px 0 0 rgba(210,200,175,0.07);
+}
+#menuScreen #helpDetails .briefCard::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  background-color: #33352e;
+  background-image:
+    repeating-linear-gradient(180deg, rgba(210,200,175,0.14) 0 1px, transparent 1px 4px),
+    linear-gradient(90deg, #52544a, #35372f 42%, #191b16);
+  box-shadow: inset 0 1px 0 rgba(210,200,175,0.2), inset 0 -2px 0 rgba(0,0,0,0.85), 0 0 0 1px rgba(0,0,0,0.75);
+}
+#menuScreen #helpDetails .briefCard::-webkit-scrollbar-thumb:hover { background-color: #43463d; }
+
+@media (pointer: coarse) {
+  #menuScreen #helpDetails { padding: 18px; }
+  #menuScreen #helpDetails .briefCard { padding: 18px 16px; }
+  #menuScreen #helpDetails .briefCard::-webkit-scrollbar { width: 8px; }
+  #menuScreen .linkBtn { padding: 8px 4px; }
+  .menuBtn { height: 64px; }
+}
+
+/* ============================================================
+   MOVIMIENTO REDUCIDO
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  .menuBtn.shake { animation: none; }
+}
+
+/* ============================================================
+   BESTIARIO  (bestiary.js)
+   ------------------------------------------------------------
+   Mismo chasis metálico que el panel de sonido: placa remachada,
+   esquinas achaflanadas y pintura gastada. Bloque autocontenido:
+   todo cuelga de #bestPanel, no pisa ninguna regla anterior.
+   ============================================================ */
+#bestPanel {
+  position: absolute;
+  inset: 0;
+  z-index: 42;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(5,6,4,0.86);
+  backdrop-filter: blur(4px) saturate(0.45) brightness(0.7);
+  -webkit-backdrop-filter: blur(4px) saturate(0.45) brightness(0.7);
+}
+#bestPanel.hidden { display: none; }
+
+#bestPanel .bestCard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: min(760px, 100%);
+  max-height: 100%;
+  padding: 18px 20px 14px;
+  clip-path: polygon(0 13px, 14px 0, calc(100% - 7px) 0, 100% 11px,
+                     100% calc(100% - 15px), calc(100% - 16px) 100%, 10px 100%, 0 calc(100% - 8px));
+  background:
+    linear-gradient(99deg, transparent 22%, rgba(255,255,255,0.032) 22.2%, transparent 22.7%),
+    radial-gradient(ellipse 70px 30px at 4% 96%, rgba(140,68,28,0.32), transparent 74%),
+    linear-gradient(180deg, rgba(255,255,255,0.04), rgba(0,0,0,0.3)),
+    linear-gradient(178deg, #333629, #191c15);
+  box-shadow:
+    inset 0 1px 0 rgba(210,200,175,0.12),
+    inset 0 0 50px rgba(0,0,0,0.72),
+    0 18px 44px rgba(0,0,0,0.85);
+}
+#bestPanel .bestCard::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 8px 9px, rgba(200,192,170,0.3) 0 1.5px, rgba(0,0,0,0.6) 1.7px 2.7px, transparent 2.9px),
+    radial-gradient(circle at calc(100% - 8px) 9px, rgba(200,192,170,0.3) 0 1.5px, rgba(0,0,0,0.6) 1.7px 2.7px, transparent 2.9px),
+    radial-gradient(circle at 8px calc(100% - 9px), rgba(200,192,170,0.3) 0 1.5px, rgba(0,0,0,0.6) 1.7px 2.7px, transparent 2.9px),
+    radial-gradient(circle at calc(100% - 8px) calc(100% - 9px), rgba(200,192,170,0.3) 0 1.5px, rgba(0,0,0,0.6) 1.7px 2.7px, transparent 2.9px);
+}
+
+/* ---- cabecera con el selector de oleada ---- */
+#bestPanel .bestHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 9px;
+  margin-bottom: 11px;
+  border-bottom: 1px solid rgba(200,192,170,0.16);
+}
+#bestPanel .bestHead h3 {
+  font-size: 13px;
+  letter-spacing: 5px;
+  color: #cfc9ae;
+  text-shadow: 0 2px 0 rgba(0,0,0,0.9);
+}
+#bestPanel .bestOleada {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+#bestPanel .bestOleada label {
+  font-size: 8.5px;
+  letter-spacing: 1.6px;
+  color: #7c8a72;
+}
+#bestPanel .bestOleada b {
+  min-width: 20px;
+  font-size: 12px;
+  color: var(--amber);
+  text-align: right;
+}
+#bestPanel #bestWaveSlider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 128px;
+  height: 5px;
+  border-radius: 0;
+  background: linear-gradient(90deg, var(--amber) var(--relleno, 100%), rgba(0,0,0,0.5) var(--relleno, 100%));
+  border: 1px solid rgba(0,0,0,0.65);
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.8);
+  cursor: pointer;
+}
+#bestPanel #bestWaveSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 11px; height: 15px;
+  background: linear-gradient(180deg, #b8b095, #6d6a55);
+  border: 1px solid #14170f;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.8);
+}
+#bestPanel #bestWaveSlider::-moz-range-thumb {
+  width: 11px; height: 15px;
+  border-radius: 0;
+  background: linear-gradient(180deg, #b8b095, #6d6a55);
+  border: 1px solid #14170f;
+}
+
+/* ---- pestañas de enemigo ---- */
+#bestPanel .bestTabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 12px;
+}
+#bestPanel .bestTab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  font-family: inherit;
+  font-size: 9.5px;
+  letter-spacing: 1.2px;
+  color: #8e9a84;
+  background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(0,0,0,0.28));
+  border: 1px solid rgba(0,0,0,0.6);
+  box-shadow: inset 0 1px 0 rgba(210,200,175,0.08);
+  cursor: pointer;
+  transition: color 0.12s, background 0.12s;
+}
+#bestPanel .bestTab:hover { color: #d2ccb2; }
+#bestPanel .bestTab.on {
+  color: #16190f;
+  background: linear-gradient(180deg, #cfc9ae, #9a957c);
+  border-color: #0d0f09;
+}
+#bestPanel .bestTab[data-jefe] { border-color: rgba(255,45,78,0.5); }
+#bestPanel .bestTabPunto {
+  width: 6px; height: 6px;
+  box-shadow: 0 0 5px currentColor;
+}
+
+/* ---- cuerpo de la ficha ---- */
+#bestPanel .bestFicha {
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  padding-right: 4px;
+}
+#bestPanel .bestFichaHead {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  padding-bottom: 11px;
+  margin-bottom: 11px;
+  border-bottom: 1px dashed rgba(200,192,170,0.16);
+}
+#bestPanel .bestRetrato {
+  display: flex;
+  align-items: flex-end;
+  gap: 5px;
+  min-width: 96px;
+  height: 132px;
+  padding: 7px 9px;
+  background:
+    radial-gradient(ellipse at 50% 100%, rgba(125,255,77,0.09), transparent 68%),
+    linear-gradient(180deg, rgba(0,0,0,0.42), rgba(0,0,0,0.16));
+  border: 1px solid rgba(0,0,0,0.55);
+  box-shadow: inset 0 0 22px rgba(0,0,0,0.7);
+}
+#bestPanel .bestSprite {
+  height: auto;
+  max-height: 118px;
+  width: auto;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 3px 4px rgba(0,0,0,0.8));
+}
+#bestPanel .bestSpriteEscudo { max-height: 74px; }
+#bestPanel .bestSinSprite {
+  width: 100%;
+  font-size: 46px;
+  text-align: center;
+  opacity: 0.5;
+  text-shadow: 0 0 18px currentColor;
+}
+#bestPanel .bestTitulo h4 {
+  font-size: 17px;
+  letter-spacing: 2.4px;
+  text-shadow: 0 2px 0 rgba(0,0,0,0.9);
+}
+#bestPanel .bestTitulo i {
+  display: block;
+  margin-top: 2px;
+  font-size: 10px;
+  font-style: italic;
+  color: #8e9a84;
+}
+#bestPanel .bestDesde {
+  display: inline-block;
+  margin-top: 7px;
+  padding: 2px 7px;
+  font-size: 8.5px;
+  letter-spacing: 1.4px;
+  color: #16190f;
+  background: repeating-linear-gradient(45deg, var(--amber) 0 5px, #c88a12 5px 10px);
+}
+#bestPanel .bestTexto {
+  font-size: 11px;
+  line-height: 1.65;
+  color: #b6bfa8;
+  margin-bottom: 12px;
+}
+
+/* ---- tabla de datos ---- */
+#bestPanel .bestStats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(178px, 1fr));
+  gap: 4px;
+  margin-bottom: 13px;
+}
+#bestPanel .bestStat {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 6px 9px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.035), rgba(0,0,0,0.26));
+  border-left: 2px solid rgba(255,176,32,0.5);
+}
+#bestPanel .bestStat span {
+  font-size: 9px;
+  letter-spacing: 1.1px;
+  color: #7c8a72;
+}
+#bestPanel .bestStat b {
+  font-size: 11px;
+  color: var(--bone);
+  white-space: nowrap;
+}
+
+/* ---- bloques de tácticas y consejo ---- */
+#bestPanel .bestBloque {
+  padding: 9px 11px;
+  margin-bottom: 8px;
+  background: rgba(0,0,0,0.22);
+  border-left: 2px solid rgba(200,192,170,0.28);
+}
+#bestPanel .bestBloque h5 {
+  font-size: 9px;
+  letter-spacing: 2.2px;
+  color: #8e9a84;
+  margin-bottom: 6px;
+}
+#bestPanel .bestBloque ul { list-style: none; }
+#bestPanel .bestBloque li {
+  position: relative;
+  padding-left: 13px;
+  font-size: 10.5px;
+  line-height: 1.6;
+  color: #b6bfa8;
+}
+#bestPanel .bestBloque li::before {
+  content: '▸';
+  position: absolute;
+  left: 0;
+  color: var(--amber);
+}
+#bestPanel .bestBloque p {
+  font-size: 10.5px;
+  line-height: 1.6;
+  color: #b6bfa8;
+}
+#bestPanel .bestBloque.consejo {
+  border-left-color: rgba(125,255,77,0.55);
+  background: rgba(125,255,77,0.05);
+}
+#bestPanel .bestBloque.consejo h5 { color: var(--toxic); }
+
+/* ---- pie ---- */
+#bestPanel .bestBtns {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 11px;
+  margin-top: 4px;
+  border-top: 1px solid rgba(200,192,170,0.16);
+}
+#bestPanel .bestClose {
+  padding: 8px 20px;
+  font-family: inherit;
+  font-size: 10px;
+  letter-spacing: 2.4px;
+  color: #16190f;
+  background: linear-gradient(180deg, #cfc9ae, #8e8a72);
+  border: 1px solid #0d0f09;
+  box-shadow: 0 2px 0 rgba(0,0,0,0.7);
+  cursor: pointer;
+}
+#bestPanel .bestClose:active { transform: translateY(2px); box-shadow: none; }
