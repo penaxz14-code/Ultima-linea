@@ -156,6 +156,19 @@
       el.style.top = y + 'px';
     }
 
+    // Posición de reposo: centro de la zona. Hace falta porque ahora los
+    // sticks se ven ANTES de tocarlos (así el jugador descubre que
+    // existen) y sin left/top aparecerían clavados en la esquina.
+    // offsetWidth/offsetHeight van en píxeles de maquetación, así que no
+    // les afecta ni la escala ni la rotación del contenedor.
+    function home(){
+      const cx = zoneEl.offsetWidth/2, cy = zoneEl.offsetHeight/2;
+      place(baseEl, cx, cy);
+      place(knobEl, cx, cy);
+    }
+    home();
+    window.addEventListener('resize', home);
+
     zoneEl.addEventListener('pointerdown', (e) => {
       e.preventDefault();
       // si ya hay un dedo mandando en esta zona, el segundo se ignora:
@@ -193,6 +206,7 @@
       pointerId = null;
       baseEl.classList.remove('active');
       knobEl.classList.remove('active');
+      home();                       // vuelve al centro, listo y a la vista
       opts.onEnd && opts.onEnd();
     }
     zoneEl.addEventListener('pointerup', end);
@@ -204,6 +218,7 @@
       pointerId = null;
       baseEl.classList.remove('active');
       knobEl.classList.remove('active');
+      home();
       opts.onEnd && opts.onEnd();
     });
     // OJO: nada de 'pointerleave' acá. Con setPointerCapture el dedo puede

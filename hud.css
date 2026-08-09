@@ -1462,32 +1462,109 @@
 }
 
 /* ============================================================
-   BOTÓN DE RECARGA MÓVIL
+   9 · BARRA ÚNICA DEL HUD
    ------------------------------------------------------------
-   #btnReloadMobile se añadió con el minijuego de recarga activa
-   pero nunca recibió estilo: salía como un botón blanco del
-   navegador, redondo por la regla de #actionCluster pero sin
-   pintar. Mismo chasis que sus hermanos del cluster, en tono
-   ámbar de munición para que se distinga de un vistazo.
+   Antes eran dos filas con space-between sobre 1000px, así que las
+   chapas quedaban desperdigadas con huecos enormes entre ellas.
+   Ahora es UNA barra: un bastidor de chapa continuo con tres grupos
+   —partida a la izquierda, mando al centro, pertrechos a la
+   derecha— y la barra de integridad cruzando por debajo, que es la
+   que da el corte visual con el juego.
+
+   Se conservan los ids #hudTop y #hudMid como grupos para no
+   invalidar todo el estilo de placas, tornillos y animaciones que
+   ya estaba resuelto más arriba en este archivo.
    ============================================================ */
-#btnReloadMobile {
-  border: none;
-  font-family: inherit;
-  font-weight: bold;
-  letter-spacing: 0.5px;
-  cursor: pointer;
-  color: #e0b45a;
-  text-shadow: 0 1px 0 rgba(0,0,0,0.9);
+#hudBar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 9px;
+  margin-bottom: 5px;
+  /* bastidor recortado a soplete, como las demás piezas */
+  clip-path: polygon(0 7px, 8px 0, calc(100% - 5px) 0, 100% 7px,
+                     100% calc(100% - 8px), calc(100% - 9px) 100%, 6px 100%, 0 calc(100% - 5px));
   background:
-    radial-gradient(circle at 36% 26%, rgba(255,255,255,0.12), transparent 44%),
-    radial-gradient(circle at 50% 56%, rgba(168,124,40,0.38), rgba(42,32,14,0.95) 76%),
-    linear-gradient(178deg, #38311d, #17130b);
+    linear-gradient(103deg, transparent 33%, rgba(255,255,255,0.03) 33.3%, transparent 33.8%),
+    radial-gradient(ellipse 44px 12px at 3% 92%, rgba(140,68,28,0.24), transparent 74%),
+    radial-gradient(ellipse 34px 10px at 97% 8%, rgba(120,58,24,0.2), transparent 74%),
+    linear-gradient(180deg, rgba(255,255,255,0.035), rgba(0,0,0,0.4)),
+    linear-gradient(178deg, #2b2e27, #14170f);
   box-shadow:
-    inset 0 2px 0 rgba(226,200,150,0.13),
-    inset 0 -4px 8px rgba(0,0,0,0.8),
-    0 4px 10px rgba(0,0,0,0.6),
-    0 0 0 2px rgba(0,0,0,0.5);
-  transition: transform 0.08s ease, filter 0.08s ease;
+    inset 0 1px 0 rgba(210,200,175,0.1),
+    inset 0 -2px 0 rgba(0,0,0,0.85),
+    inset 0 0 26px rgba(0,0,0,0.55),
+    0 3px 8px rgba(0,0,0,0.6);
 }
-#btnReloadMobile:active,
-#btnReloadMobile.pressed { transform: scale(0.92); filter: brightness(0.78); }
+
+/* remaches del bastidor, uno en cada esquina */
+#hudBar::before,
+#hudBar::after {
+  content: '';
+  position: absolute;
+  top: 5px; bottom: 5px;
+  width: 4px;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 50% 3px, rgba(200,192,170,0.34) 0 1.6px, rgba(0,0,0,0.65) 1.8px 2.8px, transparent 3px),
+    radial-gradient(circle at 50% calc(100% - 3px), rgba(200,192,170,0.34) 0 1.6px, rgba(0,0,0,0.65) 1.8px 2.8px, transparent 3px);
+}
+#hudBar::before { left: 3px; }
+#hudBar::after  { right: 3px; }
+
+#hudTop, #hudMid {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 6px;
+  margin-bottom: 0;
+  flex-wrap: nowrap;
+}
+#hudTop { flex: 1 1 auto; }
+#hudMid { flex: 1 1 auto; justify-content: flex-end; }
+
+/* mando central: separado del resto por dos juntas de chapa */
+#hudCenter {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+  padding: 0 11px;
+}
+#hudCenter::before,
+#hudCenter::after {
+  content: '';
+  position: absolute;
+  top: -3px; bottom: -3px;
+  width: 1px;
+  background: linear-gradient(180deg, transparent, rgba(200,192,170,0.16) 30%, rgba(200,192,170,0.16) 70%, transparent);
+}
+#hudCenter::before { left: 0; }
+#hudCenter::after  { right: 0; }
+
+/* la placa de munición conserva su alarma de cargador vacío aunque
+   ahora viva en el grupo de la izquierda */
+#hudTop > div.dry { animation: bombillaMuerta 1.5s steps(1,end) infinite; }
+
+/* ---- ficha de monedas: la misma moneda que sueltan los zombies ----
+   El SVG de index.html reproduce celda a celda COIN_GRID/COIN_PALETTE
+   de pickups.js, así que el icono del HUD y el objeto del suelo son
+   literalmente el mismo dibujo. Sustituye al signo "¢" suelto. */
+#hudMid > div.coinPlate { gap: 6px; }
+
+.coinIco {
+  width: 13px;
+  height: 13px;
+  image-rendering: pixelated;
+  align-self: center;
+  filter: drop-shadow(0 1px 0 rgba(0,0,0,0.85));
+}
+
+/* la moneda acusa el cobro junto con la cifra */
+#hudMid > div.bump .coinIco { animation: monedaGira 0.34s ease-out; }
+@keyframes monedaGira {
+  0%   { transform: scaleX(0.25) translateY(-1px); filter: drop-shadow(0 1px 0 rgba(0,0,0,0.85)) brightness(1.5); }
+  100% { transform: none; filter: drop-shadow(0 1px 0 rgba(0,0,0,0.85)); }
+}

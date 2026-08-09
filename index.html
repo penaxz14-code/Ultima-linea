@@ -16,17 +16,22 @@
 <div id="wrap">
   <div id="gameArea">
     <div id="hud">
-      <div id="hudTop">
-        <div>SCORE <span class="val" id="scoreVal">0</span></div>
-        <div>OLEADA <span class="val" id="waveVal">1</span></div>
-        <button id="btnPause">❚❚ PAUSA</button>
-        <button id="btnSkipWave" title="Adelantar oleada (solo pruebas)">⏭ OLEADA</button>
+      <div id="hudBar">
+        <div id="hudTop">
+          <div>SCORE <span class="val" id="scoreVal">0</span></div>
+          <div>OLEADA <span class="val" id="waveVal">1</span></div>
+          <div>MUNICIÓN <span id="ammoVal">12</span>/<span id="maxAmmoVal">12</span></div>
+        </div>
+        <div id="hudCenter">
+          <button id="btnPause">❚❚ PAUSA</button>
+          <button id="btnSkipWave" title="Adelantar oleada (solo pruebas)">⏭ OLEADA</button>
+        </div>
+        <div id="hudMid">
+          <div class="coinPlate">MONEDAS <span id="coinVal" class="val">0</span><svg class="coinIco" viewBox="0 0 6 6" shape-rendering="crispEdges" aria-hidden="true"><rect x="1" y="0" width="4" height="1" fill="#8a6510"/><rect x="0" y="1" width="1" height="1" fill="#8a6510"/><rect x="1" y="1" width="1" height="1" fill="#c89a20"/><rect x="2" y="1" width="2" height="1" fill="#ffd166"/><rect x="4" y="1" width="1" height="1" fill="#c89a20"/><rect x="5" y="1" width="1" height="1" fill="#8a6510"/><rect x="0" y="2" width="1" height="1" fill="#8a6510"/><rect x="1" y="2" width="2" height="1" fill="#ffd166"/><rect x="3" y="2" width="1" height="1" fill="#fff3c4"/><rect x="4" y="2" width="1" height="1" fill="#ffd166"/><rect x="5" y="2" width="1" height="1" fill="#8a6510"/><rect x="0" y="3" width="1" height="1" fill="#8a6510"/><rect x="1" y="3" width="1" height="1" fill="#ffd166"/><rect x="2" y="3" width="1" height="1" fill="#fff3c4"/><rect x="3" y="3" width="2" height="1" fill="#ffd166"/><rect x="5" y="3" width="1" height="1" fill="#8a6510"/><rect x="0" y="4" width="1" height="1" fill="#8a6510"/><rect x="1" y="4" width="1" height="1" fill="#c89a20"/><rect x="2" y="4" width="2" height="1" fill="#ffd166"/><rect x="4" y="4" width="1" height="1" fill="#c89a20"/><rect x="5" y="4" width="1" height="1" fill="#8a6510"/><rect x="1" y="5" width="4" height="1" fill="#8a6510"/></svg></div>
+          <div>ARMA <span id="weaponVal" class="val">PISTOLA</span></div>
+        </div>
       </div>
-      <div id="hudMid">
-        <div>MUNICIÓN <span id="ammoVal">12</span>/<span id="maxAmmoVal">12</span></div>
-        <div>MONEDAS <span id="coinVal" class="val">0</span>¢</div>
-        <div>ARMA <span id="weaponVal" class="val">PISTOLA</span></div>
-      </div>
+
       <div id="healthOuter"><div id="healthInner"></div></div>
 
       <!-- barra del jefe: 3 segmentos, uno por fase. La rellena
@@ -42,6 +47,16 @@
     </div>
 
     <canvas id="canvas"></canvas>
+
+    <!-- bandeja de controles: sólo existe en táctil. Al ser hermana de
+         un canvas con flex:1, el canvas se encoge solo y groundY se
+         recalcula en resize() — no hay que tocar nada del mundo ni del
+         juego. Los joysticks viven aquí, fuera de la carretera. -->
+    <div id="controlDeck">
+      <span class="deckLabel deckLabelL">MOVER</span>
+      <span class="deckSplit"></span>
+      <span class="deckLabel deckLabelR">APUNTAR · DISPARA</span>
+    </div>
 
     <div id="controls">
       <div class="moveRow">

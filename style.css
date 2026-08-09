@@ -1,4 +1,5 @@
-:root {
+
+  :root {
     --bg-deep: #0b0f0d;
     --bg-mid: #131c16;
     --toxic: #7dff4d;
@@ -501,13 +502,16 @@
       pointer-events:none;
     }
     .stickBase.active { opacity:1; }
+    /* acentos con la paleta del juego: verde oliva de campaña y ámbar
+       sucio de lámpara vieja — nada de verde tóxico ni ámbar puro, que
+       desentonaban con todo lo demás */
     #moveKnobBase {
-      border-color: rgba(125,255,77,0.45);
-      box-shadow: inset 0 0 14px rgba(125,255,77,0.12), 0 0 10px rgba(125,255,77,0.18);
+      border-color: rgba(111,132,66,0.6);
+      box-shadow: inset 0 0 14px rgba(111,132,66,0.14), 0 0 9px rgba(111,132,66,0.16);
     }
     #aimKnobBase {
-      border-color: rgba(255,176,32,0.5);
-      box-shadow: inset 0 0 14px rgba(255,176,32,0.14), 0 0 10px rgba(255,176,32,0.2);
+      border-color: rgba(165,110,50,0.62);
+      box-shadow: inset 0 0 14px rgba(165,110,50,0.15), 0 0 9px rgba(165,110,50,0.18);
     }
 
     /* perilla: orbe traslúcido con reborde de color, no una perilla
@@ -524,20 +528,20 @@
     }
     .stickKnob.active { opacity:1; }
     #moveKnob {
-      border: 2px solid rgba(160,255,110,0.75);
+      border: 2px solid rgba(139,161,88,0.8);
       background:
-        radial-gradient(circle at 50% 50%, rgba(0,0,0,0.35) 0 2px, transparent 2.5px),
-        radial-gradient(circle at 36% 30%, rgba(255,255,255,0.35), transparent 46%),
-        radial-gradient(circle at 50% 55%, rgba(125,255,77,0.4), rgba(70,180,50,0.16) 78%, transparent 100%);
-      box-shadow: 0 0 16px rgba(125,255,77,0.5), inset 0 0 10px rgba(125,255,77,0.2);
+        radial-gradient(circle at 50% 50%, rgba(0,0,0,0.4) 0 2px, transparent 2.5px),
+        radial-gradient(circle at 36% 30%, rgba(226,226,210,0.24), transparent 46%),
+        radial-gradient(circle at 50% 55%, rgba(111,132,66,0.42), rgba(75,90,44,0.16) 78%, transparent 100%);
+      box-shadow: 0 0 12px rgba(111,132,66,0.34), inset 0 0 10px rgba(111,132,66,0.18);
     }
     #aimKnob {
-      border: 2px solid rgba(255,205,110,0.8);
+      border: 2px solid rgba(186,132,66,0.82);
       background:
-        radial-gradient(circle at 50% 50%, rgba(0,0,0,0.35) 0 2px, transparent 2.5px),
-        radial-gradient(circle at 36% 30%, rgba(255,255,255,0.35), transparent 46%),
-        radial-gradient(circle at 50% 55%, rgba(255,176,32,0.45), rgba(255,140,20,0.18) 78%, transparent 100%);
-      box-shadow: 0 0 18px rgba(255,176,32,0.55), inset 0 0 10px rgba(255,176,32,0.22);
+        radial-gradient(circle at 50% 50%, rgba(0,0,0,0.4) 0 2px, transparent 2.5px),
+        radial-gradient(circle at 36% 30%, rgba(232,226,201,0.26), transparent 46%),
+        radial-gradient(circle at 50% 55%, rgba(165,110,50,0.46), rgba(120,74,34,0.18) 78%, transparent 100%);
+      box-shadow: 0 0 13px rgba(165,82,42,0.38), inset 0 0 10px rgba(165,110,50,0.2);
     }
 
     #actionCluster {
@@ -704,3 +708,137 @@ html, body { touch-action: pan-x pan-y; }
 
 #canvas { touch-action: none; }
 #overlay, #sndPanel .sndCard, #bestPanel .bestFicha { touch-action: pan-y; }
+
+/* ============================================================
+   SUELO BAJO LA CARRETERA  (bandeja de controles táctiles)
+   ------------------------------------------------------------
+   NO es un panel de interfaz: es el propio terreno visto en corte,
+   como si la cámara bajara un poco y se viera la tierra compactada
+   y el hormigón sobre el que se apoya el asfalto. El sistema visual
+   del juego no cambia de la carretera hacia abajo — sigue siendo el
+   mismo mundo, sólo que ahí no camina nadie y por eso es el sitio
+   natural para apoyar los pulgares.
+
+   Los colores salen del propio render (renderer.js): asfalto
+   #2c2c2e y escombro rgba(28,24,20). De ahí hacia abajo se oscurece
+   como se oscurece la tierra con la profundidad.
+
+   Como el canvas es flex:1, al meter una hermana de altura fija el
+   canvas se encoge solo y resize() recalcula groundY: el mundo, el
+   mapa y la lógica no se tocan.
+
+   En escritorio no existe: display:none y todo queda como estaba.
+   ============================================================ */
+#controlDeck { display: none; }
+
+@media (pointer: coarse) {
+  #controlDeck {
+    position: relative;
+    display: block;
+    flex: 0 0 150px;
+    height: 150px;
+    z-index: 6;
+    background:
+      /* piedras y gravilla suelta dispersas en la tierra */
+      radial-gradient(ellipse 7px 4px at 12% 34%, rgba(92,86,76,0.5), transparent 70%),
+      radial-gradient(ellipse 5px 3px at 31% 62%, rgba(78,72,63,0.45), transparent 70%),
+      radial-gradient(ellipse 9px 4px at 58% 26%, rgba(86,80,70,0.42), transparent 70%),
+      radial-gradient(ellipse 6px 4px at 76% 71%, rgba(74,69,60,0.4), transparent 70%),
+      radial-gradient(ellipse 8px 4px at 91% 44%, rgba(88,82,72,0.38), transparent 70%),
+      radial-gradient(ellipse 5px 3px at 44% 84%, rgba(70,65,57,0.4), transparent 70%),
+      radial-gradient(ellipse 6px 3px at 22% 88%, rgba(66,61,54,0.35), transparent 70%),
+      radial-gradient(ellipse 7px 4px at 67% 54%, rgba(80,74,65,0.3), transparent 70%),
+      /* vetas horizontales: capas de compactación del terreno */
+      repeating-linear-gradient(179deg,
+        rgba(0,0,0,0.16) 0 3px,
+        transparent 3px 11px),
+      /* humedad y sombra que gana según baja */
+      linear-gradient(180deg,
+        #3a352c 0,
+        #2e2a22 26%,
+        #241f19 62%,
+        #16130f 100%);
+  }
+
+  /* canto del pavimento: la banda de hormigón sobre la que se apoya
+     el asfalto, más clara y con el borde inferior desmigajado */
+  #controlDeck::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 13px;
+    background:
+      /* mordiscos irregulares en el canto inferior */
+      radial-gradient(ellipse 9px 4px at 9% 100%, #241f19 60%, transparent 62%),
+      radial-gradient(ellipse 13px 5px at 27% 100%, #241f19 60%, transparent 62%),
+      radial-gradient(ellipse 7px 4px at 41% 100%, #241f19 60%, transparent 62%),
+      radial-gradient(ellipse 15px 5px at 63% 100%, #241f19 60%, transparent 62%),
+      radial-gradient(ellipse 8px 4px at 81% 100%, #241f19 60%, transparent 62%),
+      radial-gradient(ellipse 11px 4px at 94% 100%, #241f19 60%, transparent 62%),
+      linear-gradient(180deg, #45443f 0, #3a3833 55%, #2b2924 100%);
+    box-shadow: inset 0 2px 0 rgba(0,0,0,0.5);
+  }
+
+  /* raíces y hierba seca colgando del corte, como en el resto del
+     escenario — remata la unión sin parecer una línea de interfaz */
+  #controlDeck::after {
+    content: '';
+    position: absolute;
+    top: 11px; left: 0; right: 0;
+    height: 9px;
+    opacity: 0.5;
+    background:
+      repeating-linear-gradient(96deg, transparent 0 13px, rgba(74,84,48,0.5) 13px 14px, transparent 14px 23px),
+      repeating-linear-gradient(84deg, transparent 0 19px, rgba(58,66,38,0.42) 19px 20px, transparent 20px 31px);
+    mask-image: linear-gradient(180deg, #000, transparent);
+    -webkit-mask-image: linear-gradient(180deg, #000, transparent);
+  }
+
+  /* rótulos: pintura de obra descascarada sobre el hormigón, no texto
+     de interfaz — por eso van tan apagados y ligeramente torcidos */
+  #controlDeck .deckLabel {
+    position: absolute;
+    bottom: 9px;
+    font-size: 8px;
+    letter-spacing: 3px;
+    color: rgba(150,140,116,0.26);
+    text-shadow: 0 1px 0 rgba(0,0,0,0.6);
+    pointer-events: none;
+  }
+  #controlDeck .deckLabelL { left: 7%; transform: rotate(-0.5deg); }
+  #controlDeck .deckLabelR { right: 7%; transform: rotate(0.4deg); }
+
+  /* la junta de dilatación del pavimento hace de separador central:
+     es un elemento del terreno, no una línea dibujada encima */
+  #controlDeck .deckSplit {
+    position: absolute;
+    top: 13px; bottom: 0; left: 50%;
+    width: 3px;
+    margin-left: -1.5px;
+    background: linear-gradient(180deg, rgba(0,0,0,0.5), rgba(0,0,0,0.22) 60%, transparent);
+    box-shadow: 1px 0 0 rgba(120,112,96,0.07);
+  }
+
+  /* ---- las zonas de joystick bajan al terreno ----
+     Antes ocupaban el 62% inferior de TODA la pantalla, encima del
+     asfalto: el pulgar tapaba justo la franja por donde caminan los
+     zombies. Ahora se limitan a esta banda. */
+  #moveZone, #aimZone {
+    top: auto;
+    bottom: 0;
+    height: 150px;
+  }
+
+  html.forceLandscape #moveZone,
+  html.forceLandscape #aimZone { bottom: 0; height: 150px; }
+
+  /* los botones de acción se apoyan justo encima del terreno */
+  #actionCluster { bottom: calc(150px + 10px); }
+  html.forceLandscape #actionCluster { bottom: calc(150px + 10px); right: 8px; }
+
+  /* ---- sticks visibles EN REPOSO ----
+     Media opacidad quietos, plena al usarlos. Sin esto el jugador no
+     tenía forma de saber que había joysticks. */
+  .stickBase, .stickKnob { opacity: 0.42; }
+  .stickBase.active, .stickKnob.active { opacity: 1; }
+}
