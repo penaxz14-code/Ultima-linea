@@ -1,0 +1,1493 @@
+/* ============================================================
+   ÚLTIMA LÍNEA — HUD DE CHATARRA
+   ------------------------------------------------------------
+   Criterio: nada de neón ni de terminal futurista. Esto es equipo
+   militar viejo, recuperado de un puesto abandonado y remendado
+   sobre la marcha: chapa abollada, pintura verde oliva descascarada,
+   óxido en los bordes, rótulos a plantilla medio borrados, cinta
+   adhesiva y sangre seca. La luz no "brilla": está sucia y falla.
+
+   Sin bordes luminosos, sin barridos de luz, sin líneas de barrido.
+   Los cortes de las placas son irregulares, como cortadas a soplete.
+   ============================================================ */
+
+:root {
+  /* verde oliva de campaña, no verde tóxico */
+  --olive:      #6f8442;
+  --olive-dim:  #4b5a2c;
+  --olive-dark: #2b331d;
+  /* acero sucio */
+  --steel-hi:   #4a4c44;
+  --steel:      #33352e;
+  --steel-lo:   #1c1e19;
+  --steel-deep: #0f100d;
+  /* óxido y explosión */
+  --rust:       #a5522a;
+  --rust-dark:  #6b3418;
+  --scorch:     #c96a2e;
+  /* sangre y alarma */
+  --gore:       #7a1f1f;
+  --alert:      #c23a3a;
+  /* pintura estarcida gastada */
+  --stencil:    #cfc4a6;
+  --stencil-lo: #8d846c;
+  --grime:      rgba(0,0,0,0.55);
+}
+
+/* mugre reutilizable: rayas finas, manchas de óxido y suciedad.
+   Se usa como capa de fondo encima del degradado de la chapa. */
+/* ============================================================
+   1 · MARCO DEL HUD
+   ============================================================ */
+#hud {
+  padding: 9px 13px 7px;
+  background:
+    linear-gradient(180deg, rgba(9,10,8,0.94), rgba(9,10,8,0.5) 74%, transparent);
+}
+
+/* franja de peligro despintada bajo el HUD */
+#hud::after {
+  content: '';
+  display: block;
+  height: 6px;
+  margin-top: 5px;
+  opacity: 0.5;
+  background:
+    linear-gradient(92deg, transparent 12%, rgba(0,0,0,0.6) 13%, transparent 15%,
+                    transparent 55%, rgba(0,0,0,0.5) 56%, transparent 58%),
+    repeating-linear-gradient(115deg,
+      rgba(150,120,40,0.5) 0 7px,
+      rgba(20,18,12,0.75) 7px 14px);
+  mask-image: linear-gradient(90deg, transparent, #000 6%, #000 88%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 88%, transparent);
+}
+
+#hudTop, #hudMid { gap: 6px; letter-spacing: 1.4px; }
+
+/* ============================================================
+   2 · LECTORES — chapitas atornilladas con el rótulo a plantilla
+   ============================================================ */
+#hudTop > div,
+#hudMid > div {
+  position: relative;
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  padding: 5px 10px 5px 9px;
+  font-size: 8.5px;
+  letter-spacing: 2px;
+  color: var(--stencil-lo);
+  text-shadow: 0 1px 0 rgba(0,0,0,0.85);
+  /* corte irregular, como recortada a mano */
+  clip-path: polygon(0 4px, 5px 0, calc(100% - 3px) 0, 100% 4px,
+                     100% calc(100% - 5px), calc(100% - 6px) 100%, 4px 100%, 0 calc(100% - 3px));
+  background:
+    /* rayones */
+    linear-gradient(101deg, transparent 27%, rgba(255,255,255,0.05) 27.3%, transparent 27.8%),
+    linear-gradient(76deg,  transparent 68%, rgba(0,0,0,0.3) 68.4%, transparent 69%),
+    /* óxido en dos esquinas */
+    radial-gradient(ellipse 16px 7px at 6% 92%, rgba(140,68,28,0.42), transparent 72%),
+    radial-gradient(ellipse 11px 6px at 94% 10%, rgba(120,58,24,0.35), transparent 72%),
+    /* suciedad general */
+    linear-gradient(180deg, rgba(255,255,255,0.045), rgba(0,0,0,0.32)),
+    linear-gradient(178deg, var(--steel-hi), var(--steel) 46%, var(--steel-lo));
+  box-shadow:
+    inset 0 1px 0 rgba(210,200,175,0.1),
+    inset 0 -2px 0 rgba(0,0,0,0.8),
+    inset 0 0 16px rgba(0,0,0,0.6),
+    0 2px 5px rgba(0,0,0,0.6);
+}
+
+/* tornillo gastado */
+#hudTop > div::before,
+#hudMid > div::before {
+  content: '';
+  position: absolute;
+  right: 4px; top: 4px;
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background:
+    linear-gradient(120deg, rgba(200,192,170,0.4), rgba(60,55,45,0.9)),
+    radial-gradient(circle, rgba(150,140,120,0.6), rgba(30,28,22,0.9));
+  box-shadow: 0 1px 0 rgba(0,0,0,0.8), inset 0 0 0 0.5px rgba(0,0,0,0.6);
+}
+
+#hudTop .val, #hudMid .val, #hudMid #ammoVal {
+  font-size: 14px;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+  line-height: 1;
+}
+
+/* cifras: pintura clara sobre metal, sin halo */
+#scoreVal, #waveVal, #coinVal {
+  color: #b9c98d;
+  text-shadow: 0 1px 0 rgba(0,0,0,0.9), 0 0 5px rgba(111,132,66,0.35);
+}
+#weaponVal {
+  color: var(--stencil);
+  font-size: 10.5px !important;
+  text-shadow: 0 1px 0 rgba(0,0,0,0.9);
+}
+#ammoVal {
+  color: #d9a24a;
+  text-shadow: 0 1px 0 rgba(0,0,0,0.9), 0 0 5px rgba(165,82,42,0.4);
+}
+
+/* Cuando cambia la cifra, la chapa NO se ilumina: sólo acusa el
+   golpe con un desplazamiento mínimo, como metal que vibra en sus
+   tornillos. El único cambio de luz es un roce sobre el propio
+   número, casi imperceptible. */
+#hudTop > div.bump, #hudMid > div.bump { animation: chapaGolpe 0.2s ease-out; }
+@keyframes chapaGolpe {
+  0%   { transform: translateY(-1px); }
+  45%  { transform: translateY(0.5px); }
+  100% { transform: none; }
+}
+
+#hudTop > div.bump .val,
+#hudMid > div.bump .val,
+#hudMid > div.bump #ammoVal { animation: cifraGolpe 0.22s ease-out; }
+@keyframes cifraGolpe {
+  0%   { filter: brightness(1.14); }
+  100% { filter: none; }
+}
+
+/* cargador vacío: la chapa parpadea como una bombilla fundiéndose */
+#hudMid > div.dry { animation: bombillaMuerta 1.5s steps(1,end) infinite; }
+@keyframes bombillaMuerta {
+  0%, 46%, 52%, 62%, 100% { box-shadow: inset 0 1px 0 rgba(210,200,175,0.1), inset 0 -2px 0 rgba(0,0,0,0.8), inset 0 0 16px rgba(0,0,0,0.6), 0 2px 5px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(194,58,58,0.75); }
+  48%, 56%                { box-shadow: inset 0 1px 0 rgba(210,200,175,0.1), inset 0 -2px 0 rgba(0,0,0,0.8), inset 0 0 22px rgba(122,31,31,0.5), 0 2px 5px rgba(0,0,0,0.6), inset 0 0 0 1px rgba(194,58,58,0.25); }
+}
+
+/* ============================================================
+   3 · BARRA DE INTEGRIDAD
+   Placa remachada con el rótulo a plantilla medio comido,
+   canal hundido y sangre seca acumulándose en los bordes.
+   ============================================================ */
+#healthOuter {
+  position: relative;
+  height: 22px;
+  padding: 4px 5px;
+  border: none;
+  border-radius: 0;
+  margin-bottom: 4px;
+  overflow: visible;
+  clip-path: polygon(0 6px, 7px 0, calc(100% - 4px) 0, 100% 6px,
+                     100% calc(100% - 7px), calc(100% - 8px) 100%, 5px 100%, 0 calc(100% - 4px));
+  background:
+    linear-gradient(97deg, transparent 41%, rgba(255,255,255,0.05) 41.3%, transparent 41.9%),
+    linear-gradient(83deg, transparent 73%, rgba(0,0,0,0.32) 73.3%, transparent 74%),
+    radial-gradient(ellipse 26px 8px at 3% 88%, rgba(140,68,28,0.4), transparent 74%),
+    radial-gradient(ellipse 20px 7px at 97% 14%, rgba(120,58,24,0.34), transparent 74%),
+    linear-gradient(180deg, rgba(255,255,255,0.055), rgba(0,0,0,0.34)),
+    linear-gradient(178deg, #43463d, #292b25 48%, #131511);
+  box-shadow:
+    inset 0 1px 0 rgba(210,200,175,0.14),
+    inset 0 -2px 0 rgba(0,0,0,0.85),
+    0 3px 7px rgba(0,0,0,0.65);
+}
+
+/* remaches + rótulo estarcido, por encima del relleno */
+#healthOuter::before {
+  content: 'INTEGRIDAD';
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  padding-left: 11px;
+  pointer-events: none;
+  font-family: 'Courier New', monospace;
+  font-size: 8px;
+  font-weight: bold;
+  letter-spacing: 3px;
+  color: rgba(232,224,200,0.5);
+  text-shadow: 0 1px 0 rgba(0,0,0,0.9);
+  background:
+    radial-gradient(circle at 5px 5px, rgba(200,192,170,0.4) 0 1.4px, rgba(0,0,0,0.6) 1.6px 2.5px, transparent 2.7px),
+    radial-gradient(circle at calc(100% - 5px) 5px, rgba(200,192,170,0.4) 0 1.4px, rgba(0,0,0,0.6) 1.6px 2.5px, transparent 2.7px),
+    radial-gradient(circle at 5px calc(100% - 5px), rgba(200,192,170,0.4) 0 1.4px, rgba(0,0,0,0.6) 1.6px 2.5px, transparent 2.7px),
+    radial-gradient(circle at calc(100% - 5px) calc(100% - 5px), rgba(200,192,170,0.4) 0 1.4px, rgba(0,0,0,0.6) 1.6px 2.5px, transparent 2.7px);
+}
+
+/* muescas de sector desgastadas + suciedad sobre el canal */
+#healthOuter::after {
+  content: '';
+  position: absolute;
+  left: 5px; right: 5px; top: 4px; bottom: 4px;
+  z-index: 2;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 9.85%, rgba(0,0,0,0.6) 9.85% 10%),
+    linear-gradient(180deg, rgba(255,255,255,0.14), transparent 46%),
+    linear-gradient(180deg, transparent 62%, rgba(0,0,0,0.28));
+}
+
+#healthInner {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+  border-radius: 0;
+  /* sangre seca en la cola, roja viva en la cabeza */
+  background:
+    linear-gradient(90deg, #4a1010, var(--gore) 22%, #a82c2c 66%, var(--alert));
+  box-shadow: inset 0 -3px 6px rgba(0,0,0,0.5), inset 0 2px 0 rgba(255,150,150,0.12);
+  transition: width 0.2s cubic-bezier(0.2,0.8,0.3,1);
+}
+
+/* --- estados --- */
+#healthOuter.warn  { box-shadow: inset 0 1px 0 rgba(210,200,175,0.14), inset 0 -2px 0 rgba(0,0,0,0.85), 0 3px 7px rgba(0,0,0,0.65), inset 0 0 0 1px rgba(165,82,42,0.6); }
+
+#healthOuter.critical { animation: chapaAlarma 1.1s steps(1,end) infinite; }
+@keyframes chapaAlarma {
+  0%, 58%, 66%, 100% { box-shadow: inset 0 1px 0 rgba(210,200,175,0.14), inset 0 -2px 0 rgba(0,0,0,0.85), 0 3px 7px rgba(0,0,0,0.65), inset 0 0 0 1px rgba(194,58,58,0.85); }
+  62%                { box-shadow: inset 0 1px 0 rgba(210,200,175,0.14), inset 0 -2px 0 rgba(0,0,0,0.85), 0 3px 7px rgba(0,0,0,0.65), inset 0 0 26px rgba(122,31,31,0.65), inset 0 0 0 1px rgba(194,58,58,0.4); }
+}
+/* con la vida en rojo el rótulo se borra a medias */
+#healthOuter.critical::before { color: rgba(232,200,190,0.32); }
+
+/* impacto: la placa salta en la montura */
+#healthOuter.hit { animation: placaGolpe 0.3s cubic-bezier(0.36,0.07,0.19,0.97); }
+@keyframes placaGolpe {
+  0%,100% { transform: translate(0,0) rotate(0deg); }
+  18%     { transform: translate(-5px,1px) rotate(-0.35deg); }
+  38%     { transform: translate(4px,-1px) rotate(0.3deg); }
+  62%     { transform: translate(-2px,0) rotate(-0.15deg); }
+  82%     { transform: translate(2px,0) rotate(0.1deg); }
+}
+#healthOuter.hit > #healthInner { animation: sangreGolpe 0.3s ease-out; }
+@keyframes sangreGolpe {
+  0%   { filter: brightness(2.1) saturate(1.4); }
+  100% { filter: none; }
+}
+
+/* curación: el metal se limpia un instante */
+#healthOuter.heal > #healthInner { animation: vendaje 0.55s ease-out; }
+@keyframes vendaje {
+  0%   { filter: brightness(1.5) hue-rotate(-42deg) saturate(0.7); }
+  100% { filter: none; }
+}
+
+/* sangre en los bordes de la pantalla al recibir daño */
+#dmgVignette {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+  opacity: 0;
+  background:
+    radial-gradient(ellipse 60% 46% at 12% 24%, rgba(122,31,31,0.5), transparent 68%),
+    radial-gradient(ellipse 52% 40% at 88% 78%, rgba(96,22,22,0.46), transparent 68%),
+    radial-gradient(ellipse at 50% 50%, transparent 38%, rgba(74,16,16,0.72) 100%);
+}
+#dmgVignette.show { animation: salpicadura 0.46s ease-out; }
+@keyframes salpicadura {
+  0%   { opacity: 0.92; }
+  30%  { opacity: 0.6; }
+  100% { opacity: 0; }
+}
+
+/* ============================================================
+   4 · BOTONES DEL HUD — chapas pintadas y descascaradas
+   ============================================================ */
+#hud #btnPause,
+#hud #btnSkipWave,
+#hudTop #btnDevMode {
+  position: relative;
+  padding: 6px 11px 6px 14px;
+  border: none;
+  border-radius: 0;
+  font-family: 'Courier New', monospace;
+  font-size: 9.5px;
+  font-weight: bold;
+  letter-spacing: 2px;
+  cursor: pointer;
+  text-shadow: 0 1px 0 rgba(0,0,0,0.9);
+  clip-path: polygon(0 4px, 6px 0, calc(100% - 3px) 0, 100% 5px,
+                     100% calc(100% - 4px), calc(100% - 7px) 100%, 3px 100%, 0 calc(100% - 6px));
+  background:
+    linear-gradient(104deg, transparent 33%, rgba(255,255,255,0.055) 33.3%, transparent 33.9%),
+    radial-gradient(ellipse 12px 6px at 8% 88%, rgba(140,68,28,0.4), transparent 72%),
+    linear-gradient(180deg, rgba(255,255,255,0.05), rgba(0,0,0,0.3)),
+    linear-gradient(178deg, var(--steel-hi), var(--steel) 46%, var(--steel-lo));
+  box-shadow:
+    inset 0 1px 0 rgba(210,200,175,0.12),
+    inset 0 -2px 0 rgba(0,0,0,0.85),
+    0 2px 5px rgba(0,0,0,0.6);
+  transition: transform 0.08s ease, filter 0.14s ease, box-shadow 0.14s ease;
+}
+
+#hud #btnPause      { color: #b9c98d; }
+#hud #btnSkipWave   { color: #d59b9b; }
+#hudTop #btnDevMode { color: #d9a675; border: none; }
+
+/* testigo de estado: un LED sucio, encastrado */
+#hud #btnPause::after,
+#hud #btnSkipWave::after,
+#hudTop #btnDevMode::after {
+  content: '';
+  position: absolute;
+  left: 5px; top: 50%;
+  margin-top: -2px;
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  box-shadow: inset 0 1px 1px rgba(0,0,0,0.8), 0 0 0 1px rgba(0,0,0,0.6);
+}
+#hud #btnPause::after      { background: var(--olive); }
+#hud #btnSkipWave::after   { background: var(--gore); }
+#hudTop #btnDevMode::after { background: var(--rust-dark); }
+
+#hud #btnPause:hover,
+#hud #btnSkipWave:hover,
+#hudTop #btnDevMode:hover {
+  filter: brightness(1.28);
+  transform: translateY(-1px);
+}
+#hud #btnPause:hover::after      { background: #9dbb52; }
+#hud #btnSkipWave:hover::after   { background: var(--alert); }
+#hudTop #btnDevMode:hover::after { background: var(--rust); }
+
+#hud #btnPause:active,
+#hud #btnSkipWave:active,
+#hudTop #btnDevMode:active {
+  transform: translateY(2px);
+  filter: brightness(0.75);
+  box-shadow: inset 0 3px 6px rgba(0,0,0,0.9);
+}
+
+/* DEV activo: chapa naranja quemada, con el testigo encendido */
+#hudTop #btnDevMode.on {
+  color: #f0d0ac;
+  background:
+    linear-gradient(104deg, transparent 33%, rgba(255,255,255,0.07) 33.3%, transparent 33.9%),
+    radial-gradient(ellipse 14px 7px at 8% 88%, rgba(180,88,36,0.5), transparent 72%),
+    linear-gradient(180deg, rgba(201,106,46,0.3), rgba(0,0,0,0.28)),
+    linear-gradient(178deg, #4d3620, #2a1d12);
+  box-shadow:
+    inset 0 1px 0 rgba(230,190,150,0.16),
+    inset 0 -2px 0 rgba(0,0,0,0.85),
+    0 2px 5px rgba(0,0,0,0.6),
+    inset 0 0 0 1px rgba(165,82,42,0.7);
+}
+#hudTop #btnDevMode.on::after {
+  background: var(--scorch);
+  animation: testigoSucio 1.4s steps(1,end) infinite;
+}
+@keyframes testigoSucio {
+  0%, 70%, 78%, 100% { opacity: 1; }
+  74%                { opacity: 0.35; }
+}
+
+#hud #devBadge {
+  top: auto;
+  bottom: -17px;
+  font-size: 8px;
+  font-weight: bold;
+  letter-spacing: 3.4px;
+  color: #d9a675;
+  text-shadow: 0 1px 0 rgba(0,0,0,0.9);
+  padding: 2px 9px;
+  background: rgba(28,18,10,0.85);
+  box-shadow: inset 0 0 0 1px rgba(165,82,42,0.45);
+  clip-path: polygon(0 3px, 5px 0, 100% 0, calc(100% - 5px) 100%, 0 100%);
+}
+
+/* ============================================================
+   5 · BARRA DEL JEFE — chapa cruda con sangre
+   ============================================================ */
+#bossBarName {
+  font-size: 9px;
+  font-weight: bold;
+  letter-spacing: 5px;
+  color: #d9a8a8;
+  text-shadow: 0 1px 0 rgba(0,0,0,0.9);
+}
+.bossSeg {
+  height: 13px;
+  border: none;
+  border-radius: 0;
+  transform: none;
+  background: linear-gradient(178deg, #2a2320, #100b0a);
+  box-shadow:
+    inset 0 1px 0 rgba(210,190,180,0.1),
+    inset 0 -2px 0 rgba(0,0,0,0.85),
+    inset 0 0 10px rgba(0,0,0,0.8),
+    inset 0 0 0 1px rgba(122,31,31,0.6);
+}
+.bossSeg.active { box-shadow: inset 0 1px 0 rgba(210,190,180,0.14), inset 0 -2px 0 rgba(0,0,0,0.85), inset 0 0 0 1px rgba(194,58,58,0.9); }
+.bossSeg > i {
+  background: linear-gradient(90deg, #3d0c0c, var(--gore) 40%, #a82c2c 78%, var(--scorch));
+  box-shadow: inset 0 -2px 5px rgba(0,0,0,0.55);
+}
+
+/* ============================================================
+   6 · PANEL DE PAUSA / TIENDA / FIN
+   No es un terminal: es un tablón de chapa atornillado a la pared,
+   con cinta en las esquinas y el rótulo pintado a plantilla.
+   ============================================================ */
+#overlay {
+  background: rgba(8,9,7,0.66);
+  backdrop-filter: blur(4px) saturate(0.45) brightness(0.7);
+  -webkit-backdrop-filter: blur(4px) saturate(0.45) brightness(0.7);
+}
+
+/* polvo y arañazos sobre el cristal del fondo */
+#overlay::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.5;
+  background:
+    linear-gradient(107deg, transparent 19%, rgba(255,255,255,0.03) 19.2%, transparent 19.7%),
+    linear-gradient(72deg,  transparent 54%, rgba(255,255,255,0.025) 54.2%, transparent 54.6%),
+    linear-gradient(96deg,  transparent 81%, rgba(0,0,0,0.28) 81.3%, transparent 82%),
+    radial-gradient(ellipse at 50% 50%, transparent 46%, rgba(0,0,0,0.55) 100%);
+}
+
+.termPanel {
+  position: relative;
+  z-index: 1;
+  width: min(560px, 100%);
+  max-height: 100%;
+  overflow-y: auto;
+  padding: 38px 28px 24px;
+  text-align: center;
+  clip-path: polygon(0 14px, 15px 0, calc(100% - 9px) 0, 100% 12px,
+                     100% calc(100% - 16px), calc(100% - 17px) 100%, 11px 100%, 0 calc(100% - 10px));
+  background:
+    /* arañazos */
+    linear-gradient(99deg,  transparent 23%, rgba(255,255,255,0.035) 23.2%, transparent 23.7%),
+    linear-gradient(81deg,  transparent 61%, rgba(0,0,0,0.3) 61.2%, transparent 61.8%),
+    linear-gradient(104deg, transparent 77%, rgba(255,255,255,0.028) 77.2%, transparent 77.6%),
+    /* óxido en las esquinas bajas */
+    radial-gradient(ellipse 90px 40px at 4% 97%, rgba(140,68,28,0.34), transparent 72%),
+    radial-gradient(ellipse 70px 34px at 97% 4%, rgba(120,58,24,0.28), transparent 72%),
+    /* mugre */
+    linear-gradient(180deg, rgba(255,255,255,0.045), rgba(0,0,0,0.32)),
+    linear-gradient(178deg, #333629, #1d2018 52%, #10120d);
+  box-shadow:
+    inset 0 1px 0 rgba(210,200,175,0.12),
+    inset 0 0 60px rgba(0,0,0,0.75),
+    0 20px 50px rgba(0,0,0,0.8);
+  animation: tablonEntra 0.26s cubic-bezier(0.25,0.9,0.35,1);
+}
+@keyframes tablonEntra {
+  0%   { opacity: 0; transform: translateY(-10px) rotate(-0.5deg); }
+  70%  { transform: translateY(2px) rotate(0.2deg); }
+  100% { opacity: 1; transform: none; }
+}
+
+/* cabecera: banda de peligro con el rótulo a plantilla */
+.termPanel::before {
+  content: attr(data-title);
+  position: absolute;
+  left: 0; right: 0; top: 0;
+  padding: 8px 14px;
+  text-align: left;
+  font-size: 8px;
+  font-weight: bold;
+  letter-spacing: 3.2px;
+  color: rgba(207,196,166,0.72);
+  text-shadow: 0 1px 0 rgba(0,0,0,0.9);
+  background:
+    repeating-linear-gradient(115deg, rgba(150,120,40,0.16) 0 8px, rgba(20,18,12,0.3) 8px 16px),
+    linear-gradient(180deg, rgba(0,0,0,0.45), rgba(0,0,0,0.15));
+  border-bottom: 1px solid rgba(0,0,0,0.7);
+  box-shadow: 0 1px 0 rgba(210,200,175,0.07);
+}
+
+/* remaches + cinta adhesiva en dos esquinas */
+.termPanel::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 9px 9px, rgba(200,192,170,0.32) 0 1.6px, rgba(0,0,0,0.6) 1.8px 2.8px, transparent 3px),
+    radial-gradient(circle at calc(100% - 9px) 9px, rgba(200,192,170,0.32) 0 1.6px, rgba(0,0,0,0.6) 1.8px 2.8px, transparent 3px),
+    radial-gradient(circle at 9px calc(100% - 9px), rgba(200,192,170,0.32) 0 1.6px, rgba(0,0,0,0.6) 1.8px 2.8px, transparent 3px),
+    radial-gradient(circle at calc(100% - 9px) calc(100% - 9px), rgba(200,192,170,0.32) 0 1.6px, rgba(0,0,0,0.6) 1.8px 2.8px, transparent 3px),
+    /* cinta gris en la esquina superior derecha e inferior izquierda */
+    linear-gradient(-45deg, transparent calc(100% - 34px), rgba(188,180,158,0.16) calc(100% - 34px), rgba(188,180,158,0.16) calc(100% - 22px), transparent calc(100% - 22px)),
+    linear-gradient(135deg, transparent calc(100% - 30px), rgba(188,180,158,0.13) calc(100% - 30px), rgba(188,180,158,0.13) calc(100% - 20px), transparent calc(100% - 20px));
+}
+
+/* acentos por contexto */
+.termPanel[data-mode="tienda"] { box-shadow: inset 0 1px 0 rgba(210,200,175,0.12), inset 0 0 60px rgba(0,0,0,0.75), 0 20px 50px rgba(0,0,0,0.8), inset 0 0 0 1px rgba(165,82,42,0.34); }
+.termPanel[data-mode="fin"]    { box-shadow: inset 0 1px 0 rgba(210,200,175,0.12), inset 0 0 60px rgba(0,0,0,0.8), 0 20px 50px rgba(0,0,0,0.85), inset 0 0 0 1px rgba(122,31,31,0.5); }
+.termPanel[data-mode="fin"]::before { color: rgba(217,168,168,0.75); }
+
+#overlay h2 {
+  margin: 6px 0 12px;
+  font-size: 25px;
+  font-weight: bold;
+  letter-spacing: 8px;
+  text-indent: 8px;
+  color: var(--stencil);
+  text-shadow: 0 2px 0 rgba(0,0,0,0.9), 0 0 14px rgba(0,0,0,0.6);
+  /* la pintura del rótulo está comida por arriba */
+  background: linear-gradient(180deg, rgba(0,0,0,0.35) 0 3px, transparent 3px);
+}
+.termPanel[data-mode="tienda"] h2 { color: #e2c493; }
+.termPanel[data-mode="fin"]    h2 { color: #d9a0a0; text-shadow: 0 2px 0 rgba(0,0,0,0.9), 0 0 16px rgba(122,31,31,0.5); }
+
+#overlay p {
+  position: relative;
+  max-width: 420px;
+  margin: 0 auto 18px;
+  padding: 9px 12px 9px 24px;
+  text-align: left;
+  font-size: 11px;
+  line-height: 1.75;
+  color: rgba(160,158,134,0.85);
+  background: rgba(0,0,0,0.32);
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.6), inset 0 1px 0 rgba(210,200,175,0.06);
+}
+#overlay p::before {
+  content: '▸';
+  position: absolute;
+  left: 10px; top: 9px;
+  color: var(--olive);
+}
+
+#overlay .score-final {
+  display: inline-block;
+  margin-bottom: 18px;
+  padding: 8px 20px;
+  font-size: 13px;
+  font-weight: bold;
+  letter-spacing: 2.4px;
+  color: #d9a24a;
+  text-shadow: 0 1px 0 rgba(0,0,0,0.9);
+  clip-path: polygon(0 5px, 6px 0, 100% 0, 100% calc(100% - 5px), calc(100% - 6px) 100%, 0 100%);
+  background: linear-gradient(180deg, rgba(165,82,42,0.14), rgba(0,0,0,0.34));
+  box-shadow: inset 0 1px 0 rgba(210,200,175,0.1), inset 0 0 0 1px rgba(0,0,0,0.6);
+}
+
+/* ---- botones del panel: chapa gruesa remachada ---- */
+#overlay #resumeBtn,
+#overlay #shopContinue,
+#overlay #startBtn,
+#overlay .toMenuBtn {
+  position: relative;
+  display: inline-block;
+  margin: 4px 5px;
+  padding: 13px 30px;
+  border: none;
+  border-radius: 0;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  font-weight: bold;
+  letter-spacing: 4px;
+  text-indent: 4px;
+  cursor: pointer;
+  color: #c3d199;
+  text-shadow: 0 2px 0 rgba(0,0,0,0.9);
+  clip-path: polygon(0 9px, 10px 0, calc(100% - 5px) 0, 100% 8px,
+                     100% calc(100% - 10px), calc(100% - 11px) 100%, 6px 100%, 0 calc(100% - 6px));
+  background:
+    linear-gradient(102deg, transparent 29%, rgba(255,255,255,0.055) 29.3%, transparent 29.9%),
+    radial-gradient(ellipse 22px 9px at 6% 90%, rgba(140,68,28,0.4), transparent 72%),
+    linear-gradient(180deg, rgba(111,132,66,0.16), rgba(0,0,0,0.3)),
+    linear-gradient(178deg, var(--steel-hi), var(--steel) 46%, var(--steel-deep));
+  box-shadow:
+    inset 0 1px 0 rgba(210,200,175,0.14),
+    inset 0 -3px 0 rgba(0,0,0,0.85),
+    0 5px 12px rgba(0,0,0,0.65);
+  transition: transform 0.09s ease, filter 0.15s ease, box-shadow 0.15s ease;
+}
+
+/* remaches del propio botón */
+#overlay #resumeBtn::after,
+#overlay #shopContinue::after,
+#overlay #startBtn::after,
+#overlay .toMenuBtn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 7px 50%, rgba(200,192,170,0.3) 0 1.4px, rgba(0,0,0,0.6) 1.6px 2.4px, transparent 2.6px),
+    radial-gradient(circle at calc(100% - 7px) 50%, rgba(200,192,170,0.3) 0 1.4px, rgba(0,0,0,0.6) 1.6px 2.4px, transparent 2.6px);
+}
+
+#overlay #resumeBtn:hover,
+#overlay #shopContinue:hover,
+#overlay #startBtn:hover,
+#overlay .toMenuBtn:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.3);
+  box-shadow:
+    inset 0 1px 0 rgba(210,200,175,0.18),
+    inset 0 -3px 0 rgba(0,0,0,0.85),
+    0 8px 18px rgba(0,0,0,0.7);
+}
+#overlay #resumeBtn:active,
+#overlay #shopContinue:active,
+#overlay #startBtn:active,
+#overlay .toMenuBtn:active {
+  transform: translateY(3px);
+  filter: brightness(0.72);
+  box-shadow: inset 0 4px 9px rgba(0,0,0,0.9);
+}
+
+/* volver al menú: secundario, chapa más pequeña y oxidada */
+#overlay .toMenuBtn {
+  padding: 9px 20px;
+  font-size: 10px;
+  letter-spacing: 2.4px;
+  color: #c0a077;
+  background:
+    linear-gradient(102deg, transparent 29%, rgba(255,255,255,0.045) 29.3%, transparent 29.9%),
+    radial-gradient(ellipse 18px 8px at 7% 88%, rgba(140,68,28,0.45), transparent 72%),
+    linear-gradient(180deg, rgba(165,82,42,0.13), rgba(0,0,0,0.3)),
+    linear-gradient(178deg, #3d3a30, #191713);
+}
+
+/* fin de partida: reintentar en rojo apagado */
+.termPanel[data-mode="fin"] #startBtn {
+  color: #d9a0a0;
+  background:
+    linear-gradient(102deg, transparent 29%, rgba(255,255,255,0.05) 29.3%, transparent 29.9%),
+    radial-gradient(ellipse 22px 9px at 6% 90%, rgba(140,68,28,0.42), transparent 72%),
+    linear-gradient(180deg, rgba(122,31,31,0.28), rgba(0,0,0,0.3)),
+    linear-gradient(178deg, #443733, #1a1412);
+}
+
+/* ============================================================
+   7 · TIENDA — cajones de suministro
+   ============================================================ */
+.shopGrid { max-width: 100%; gap: 8px; }
+
+.shopItem {
+  position: relative;
+  padding: 9px 11px;
+  border: none;
+  border-radius: 0;
+  clip-path: polygon(0 5px, 6px 0, calc(100% - 3px) 0, 100% 5px,
+                     100% calc(100% - 6px), calc(100% - 7px) 100%, 4px 100%, 0 calc(100% - 3px));
+  background:
+    linear-gradient(103deg, transparent 31%, rgba(255,255,255,0.04) 31.3%, transparent 31.8%),
+    radial-gradient(ellipse 20px 8px at 4% 90%, rgba(140,68,28,0.32), transparent 74%),
+    linear-gradient(180deg, rgba(255,255,255,0.04), rgba(0,0,0,0.28)),
+    linear-gradient(178deg, #333629, #191c15);
+  box-shadow:
+    inset 0 1px 0 rgba(210,200,175,0.1),
+    inset 0 -2px 0 rgba(0,0,0,0.75),
+    0 2px 6px rgba(0,0,0,0.55);
+  transition: filter 0.14s ease, transform 0.09s ease;
+}
+.shopItem:hover { transform: translateY(-1px); filter: brightness(1.2); }
+
+.shopIcon {
+  width: 38px; height: 38px;
+  background: rgba(0,0,0,0.3);
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.6), inset 0 1px 0 rgba(210,200,175,0.08);
+}
+.shopItemInfo b { color: var(--stencil); font-size: 11px; letter-spacing: 1.5px; text-shadow: 0 1px 0 rgba(0,0,0,0.9); }
+.shopItemInfo span { color: rgba(150,148,126,0.8); font-size: 9.5px; }
+
+.shopBuyBtn {
+  border: none;
+  border-radius: 0;
+  padding: 9px 14px;
+  font-size: 11px;
+  font-weight: bold;
+  letter-spacing: 1.4px;
+  color: #d9a24a;
+  text-shadow: 0 1px 0 rgba(0,0,0,0.9);
+  clip-path: polygon(0 4px, 5px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 5px) 100%, 0 100%);
+  background:
+    linear-gradient(180deg, rgba(165,82,42,0.2), rgba(0,0,0,0.3)),
+    linear-gradient(178deg, #3c3527, #1a1610);
+  box-shadow:
+    inset 0 1px 0 rgba(210,190,150,0.12),
+    inset 0 -2px 0 rgba(0,0,0,0.8),
+    0 2px 4px rgba(0,0,0,0.5);
+  transition: transform 0.08s ease, filter 0.14s ease;
+}
+.shopBuyBtn:hover:not(:disabled) { transform: translateY(-1px); filter: brightness(1.32); }
+.shopBuyBtn:active:not(:disabled) { transform: translateY(2px); filter: brightness(0.75); box-shadow: inset 0 3px 6px rgba(0,0,0,0.9); }
+.shopBuyBtn:disabled {
+  opacity: 1;
+  color: rgba(130,126,108,0.5);
+  text-shadow: none;
+  background: linear-gradient(178deg, #23251f, #101208);
+  box-shadow: inset 0 2px 5px rgba(0,0,0,0.75);
+}
+
+/* ============================================================
+   8 · CONTROLES DE JUEGO
+   ============================================================ */
+.movebtn {
+  border: none;
+  border-radius: 0;
+  color: #b9c98d;
+  text-shadow: 0 1px 0 rgba(0,0,0,0.9);
+  clip-path: polygon(0 8px, 9px 0, calc(100% - 4px) 0, 100% 7px,
+                     100% calc(100% - 9px), calc(100% - 10px) 100%, 5px 100%, 0 calc(100% - 5px));
+  background:
+    linear-gradient(102deg, transparent 30%, rgba(255,255,255,0.05) 30.3%, transparent 30.9%),
+    radial-gradient(ellipse 16px 8px at 8% 90%, rgba(140,68,28,0.4), transparent 72%),
+    linear-gradient(180deg, rgba(111,132,66,0.16), rgba(0,0,0,0.3)),
+    linear-gradient(178deg, var(--steel-hi), var(--steel) 46%, var(--steel-deep));
+  box-shadow:
+    inset 0 1px 0 rgba(210,200,175,0.14),
+    inset 0 -3px 0 rgba(0,0,0,0.85),
+    0 4px 9px rgba(0,0,0,0.6);
+}
+.movebtn:active, .movebtn.pressed {
+  transform: translateY(2px) scale(0.97);
+  filter: brightness(0.72);
+  box-shadow: inset 0 4px 9px rgba(0,0,0,0.9);
+}
+
+#btnFire {
+  border: none;
+  color: #e0b0b0;
+  text-shadow: 0 1px 0 rgba(0,0,0,0.9);
+  background:
+    radial-gradient(circle at 36% 26%, rgba(255,255,255,0.14), transparent 44%),
+    radial-gradient(circle at 50% 56%, rgba(168,44,44,0.5), rgba(48,14,14,0.95) 76%),
+    linear-gradient(178deg, #3a2422, #150c0b);
+  box-shadow:
+    inset 0 2px 0 rgba(220,180,180,0.14),
+    inset 0 -4px 8px rgba(0,0,0,0.8),
+    0 4px 11px rgba(0,0,0,0.65),
+    0 0 0 2px rgba(0,0,0,0.55);
+}
+#btnFire:active, #btnFire.pressed {
+  transform: scale(0.93);
+  filter: brightness(1.35);
+  box-shadow: inset 0 5px 14px rgba(0,0,0,0.9), 0 0 0 2px rgba(122,31,31,0.8);
+}
+
+#btnSwitchWeapon, #btnSwitchWeaponMobile {
+  border: none;
+  color: #d9a24a;
+  text-shadow: 0 1px 0 rgba(0,0,0,0.9);
+  background:
+    radial-gradient(circle at 36% 26%, rgba(255,255,255,0.12), transparent 44%),
+    radial-gradient(circle at 50% 56%, rgba(140,90,36,0.4), rgba(40,28,12,0.95) 76%),
+    linear-gradient(178deg, #35301f, #16120c);
+  box-shadow:
+    inset 0 2px 0 rgba(220,195,150,0.13),
+    inset 0 -4px 8px rgba(0,0,0,0.8),
+    0 4px 10px rgba(0,0,0,0.6),
+    0 0 0 2px rgba(0,0,0,0.5);
+}
+#btnSwitchWeapon:active, #btnSwitchWeaponMobile:active,
+#btnSwitchWeapon.pressed, #btnSwitchWeaponMobile.pressed { transform: scale(0.92); filter: brightness(0.78); }
+
+#btnDash, #btnDashMobile {
+  border: none;
+  color: #a8bcae;
+  text-shadow: 0 1px 0 rgba(0,0,0,0.9);
+  background:
+    radial-gradient(circle at 36% 26%, rgba(255,255,255,0.12), transparent 44%),
+    radial-gradient(circle at 50% 56%, rgba(96,120,104,0.34), rgba(24,32,28,0.95) 76%),
+    linear-gradient(178deg, #2a332c, #111512);
+  box-shadow:
+    inset 0 2px 0 rgba(190,210,195,0.12),
+    inset 0 -4px 8px rgba(0,0,0,0.8),
+    0 4px 10px rgba(0,0,0,0.6),
+    0 0 0 2px rgba(0,0,0,0.5);
+}
+#btnDash:active:not(:disabled), #btnDashMobile:active:not(:disabled),
+#btnDash.pressed:not(:disabled), #btnDashMobile.pressed:not(:disabled) { transform: scale(0.92); filter: brightness(0.78); }
+#btnDash:disabled, #btnDashMobile:disabled {
+  opacity: 0.4;
+  color: rgba(130,126,108,0.7);
+  background: linear-gradient(178deg, #212420, #0e100d);
+  box-shadow: inset 0 3px 7px rgba(0,0,0,0.8), 0 0 0 2px rgba(0,0,0,0.5);
+}
+
+#joystickPad {
+  border: none;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(0,0,0,0.55), transparent 64%),
+    radial-gradient(circle at 36% 28%, rgba(140,90,36,0.14), rgba(20,18,12,0.5));
+  box-shadow:
+    inset 0 4px 10px rgba(0,0,0,0.85),
+    inset 0 -1px 0 rgba(210,190,150,0.08),
+    0 0 0 2px rgba(0,0,0,0.55);
+}
+#joystickKnob {
+  background:
+    radial-gradient(circle at 34% 28%, rgba(230,210,170,0.85), rgba(150,95,30,0.75) 68%);
+  box-shadow: inset 0 -3px 6px rgba(70,38,0,0.7), 0 2px 5px rgba(0,0,0,0.7);
+}
+#joystickPad::after { letter-spacing: 2px; color: rgba(180,150,100,0.5); }
+
+/* ============================================================
+   8.5 · DESPLAZAMIENTO — guía hundida con corredera de metal
+   La tienda es lo único que puede desbordar. La barra se trata
+   como una pieza más del equipo: canal remachado y una corredera
+   con estrías de agarre.
+
+   IMPORTANTE PARA MÓVIL: style.css pone touch-action:none en el
+   body para que el juego no haga scroll al jugar. Eso también
+   impide arrastrar para desplazar la tienda, así que aquí se le
+   devuelve el gesto vertical SOLO a los paneles desplazables.
+   ============================================================ */
+#overlay,
+.termPanel,
+.shopGrid,
+#menuScreen #helpDetails .briefCard {
+  touch-action: pan-y;                 /* devuelve el arrastre vertical en táctil */
+  overscroll-behavior: contain;        /* al llegar al tope no arrastra el fondo */
+  -webkit-overflow-scrolling: touch;   /* inercia en iOS */
+  scrollbar-width: thin;
+  scrollbar-color: #43463d rgba(0,0,0,0.55);
+}
+
+/* --- canal --- */
+#overlay::-webkit-scrollbar,
+.termPanel::-webkit-scrollbar {
+  width: 13px;
+  background: transparent;
+}
+#overlay::-webkit-scrollbar-track,
+.termPanel::-webkit-scrollbar-track {
+  background:
+    repeating-linear-gradient(180deg, rgba(150,120,40,0.07) 0 7px, transparent 7px 14px),
+    linear-gradient(90deg, rgba(0,0,0,0.75), rgba(0,0,0,0.42) 45%, rgba(0,0,0,0.75));
+  box-shadow:
+    inset 1px 0 0 rgba(0,0,0,0.85),
+    inset -1px 0 0 rgba(210,200,175,0.07),
+    inset 0 2px 4px rgba(0,0,0,0.7);
+}
+
+/* --- corredera: chapa con estrías de agarre y óxido --- */
+#overlay::-webkit-scrollbar-thumb,
+.termPanel::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  background-color: #33352e;
+  background-image:
+    repeating-linear-gradient(180deg,
+      rgba(210,200,175,0.14) 0 1px,
+      transparent 1px 4px),
+    radial-gradient(ellipse 10px 14px at 50% 96%, rgba(140,68,28,0.5), transparent 72%),
+    linear-gradient(90deg, #52544a, #35372f 42%, #191b16);
+  box-shadow:
+    inset 0 1px 0 rgba(210,200,175,0.2),
+    inset 0 -2px 0 rgba(0,0,0,0.85),
+    inset -1px 0 0 rgba(0,0,0,0.6),
+    0 0 0 1px rgba(0,0,0,0.75);
+}
+#overlay::-webkit-scrollbar-thumb:hover,
+.termPanel::-webkit-scrollbar-thumb:hover {
+  background-color: #43463d;
+  background-image:
+    repeating-linear-gradient(180deg, rgba(210,200,175,0.2) 0 1px, transparent 1px 4px),
+    radial-gradient(ellipse 10px 14px at 50% 96%, rgba(165,82,42,0.6), transparent 72%),
+    linear-gradient(90deg, #63665a, #43463d 42%, #22251d);
+}
+#overlay::-webkit-scrollbar-thumb:active,
+.termPanel::-webkit-scrollbar-thumb:active {
+  background-color: #262820;
+  background-image:
+    repeating-linear-gradient(180deg, rgba(210,200,175,0.1) 0 1px, transparent 1px 4px),
+    linear-gradient(90deg, #2e302a, #1a1c17 42%, #101208);
+  box-shadow: inset 0 2px 5px rgba(0,0,0,0.9), 0 0 0 1px rgba(0,0,0,0.8);
+}
+
+/* topes del canal, como los finales de una guía real */
+#overlay::-webkit-scrollbar-button,
+.termPanel::-webkit-scrollbar-button {
+  height: 5px;
+  background:
+    linear-gradient(180deg, rgba(210,200,175,0.1), rgba(0,0,0,0.6)),
+    linear-gradient(90deg, #3a3d34, #1c1e19);
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.7);
+}
+#overlay::-webkit-scrollbar-corner,
+.termPanel::-webkit-scrollbar-corner { background: rgba(0,0,0,0.6); }
+
+/* la rejilla de la tienda no necesita barra propia */
+.shopGrid::-webkit-scrollbar { width: 0; height: 0; }
+
+/* ============================================================
+   8.7 · PANEL DE SONIDO
+   Caja de equipo abierta: potenciómetros hundidos en el chasis,
+   ruedas de metal estriado y rótulos a plantilla.
+   ============================================================ */
+#sndPanel {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 26px;
+  background: rgba(5,6,4,0.84);
+  backdrop-filter: blur(4px) saturate(0.45) brightness(0.7);
+  -webkit-backdrop-filter: blur(4px) saturate(0.45) brightness(0.7);
+}
+#sndPanel.hidden { display: none; }
+
+#sndPanel .sndCard {
+  position: relative;
+  width: min(420px, 100%);
+  max-height: 100%;
+  overflow-y: auto;
+  padding: 22px 24px 18px;
+  touch-action: pan-y;
+  overscroll-behavior: contain;
+  clip-path: polygon(0 13px, 14px 0, calc(100% - 7px) 0, 100% 11px,
+                     100% calc(100% - 15px), calc(100% - 16px) 100%, 10px 100%, 0 calc(100% - 8px));
+  background:
+    linear-gradient(99deg, transparent 22%, rgba(255,255,255,0.032) 22.2%, transparent 22.7%),
+    linear-gradient(82deg, transparent 64%, rgba(0,0,0,0.28) 64.2%, transparent 64.8%),
+    radial-gradient(ellipse 70px 30px at 4% 96%, rgba(140,68,28,0.32), transparent 74%),
+    linear-gradient(180deg, rgba(255,255,255,0.04), rgba(0,0,0,0.3)),
+    linear-gradient(178deg, #333629, #191c15);
+  box-shadow:
+    inset 0 1px 0 rgba(210,200,175,0.12),
+    inset 0 0 50px rgba(0,0,0,0.72),
+    0 18px 44px rgba(0,0,0,0.85);
+  animation: tablonEntra 0.24s cubic-bezier(0.25,0.9,0.35,1);
+}
+/* remaches del chasis */
+#sndPanel .sndCard::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 8px 9px, rgba(200,192,170,0.3) 0 1.5px, rgba(0,0,0,0.6) 1.7px 2.7px, transparent 2.9px),
+    radial-gradient(circle at calc(100% - 8px) 9px, rgba(200,192,170,0.3) 0 1.5px, rgba(0,0,0,0.6) 1.7px 2.7px, transparent 2.9px),
+    radial-gradient(circle at 8px calc(100% - 9px), rgba(200,192,170,0.3) 0 1.5px, rgba(0,0,0,0.6) 1.7px 2.7px, transparent 2.9px),
+    radial-gradient(circle at calc(100% - 8px) calc(100% - 9px), rgba(200,192,170,0.3) 0 1.5px, rgba(0,0,0,0.6) 1.7px 2.7px, transparent 2.9px);
+}
+
+#sndPanel h3 {
+  margin-bottom: 16px;
+  padding-bottom: 9px;
+  font-size: 13px;
+  font-weight: bold;
+  letter-spacing: 5px;
+  color: var(--stencil);
+  text-shadow: 0 2px 0 rgba(0,0,0,0.9);
+  border-bottom: 1px solid rgba(0,0,0,0.65);
+  box-shadow: 0 1px 0 rgba(210,200,175,0.07);
+}
+
+#sndPanel .sndRow {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin-bottom: 15px;
+}
+
+#sndPanel .sndLabel {
+  flex: 0 0 92px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 9.5px;
+  font-weight: bold;
+  letter-spacing: 1.8px;
+  color: var(--stencil-lo);
+  text-shadow: 0 1px 0 rgba(0,0,0,0.9);
+}
+#sndPanel .sndLabel i {
+  font-style: normal;
+  font-size: 7.5px;
+  font-weight: normal;
+  letter-spacing: 0.3px;
+  color: rgba(130,126,105,0.7);
+}
+
+#sndPanel .sndTrack { flex: 1; display: flex; align-items: center; }
+
+/* --- potenciómetro: guía hundida + rueda estriada --- */
+#sndPanel .sndSlider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 16px;
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+  touch-action: none;     /* permite arrastrar el mando en táctil */
+}
+#sndPanel .sndSlider::-webkit-slider-runnable-track {
+  height: 10px;
+  border-radius: 0;
+  background:
+    linear-gradient(90deg, rgba(165,82,42,0.55) 0 var(--relleno, 0%), transparent var(--relleno, 0%)),
+    repeating-linear-gradient(90deg, transparent 0 9%, rgba(0,0,0,0.5) 9% 10%),
+    linear-gradient(180deg, rgba(0,0,0,0.8), rgba(0,0,0,0.4));
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.85), inset 0 -1px 0 rgba(210,200,175,0.07);
+}
+#sndPanel .sndSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 13px; height: 20px;
+  margin-top: -5px;
+  border-radius: 1px;
+  background:
+    repeating-linear-gradient(90deg, rgba(210,200,175,0.2) 0 1px, transparent 1px 3px),
+    linear-gradient(180deg, #55584d, #35372f 46%, #191b16);
+  box-shadow:
+    inset 0 1px 0 rgba(210,200,175,0.28),
+    inset 0 -2px 0 rgba(0,0,0,0.85),
+    0 2px 4px rgba(0,0,0,0.8),
+    0 0 0 1px rgba(0,0,0,0.75);
+}
+#sndPanel .sndSlider:hover::-webkit-slider-thumb { background:
+    repeating-linear-gradient(90deg, rgba(210,200,175,0.26) 0 1px, transparent 1px 3px),
+    linear-gradient(180deg, #676a5d, #43463d 46%, #22251d); }
+#sndPanel .sndSlider:active::-webkit-slider-thumb { background:
+    repeating-linear-gradient(90deg, rgba(210,200,175,0.14) 0 1px, transparent 1px 3px),
+    linear-gradient(180deg, #2e302a, #14160f); }
+
+/* Firefox */
+#sndPanel .sndSlider::-moz-range-track {
+  height: 10px;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 9%, rgba(0,0,0,0.5) 9% 10%),
+    linear-gradient(180deg, rgba(0,0,0,0.8), rgba(0,0,0,0.4));
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.85);
+}
+#sndPanel .sndSlider::-moz-range-progress {
+  height: 10px;
+  background: rgba(165,82,42,0.55);
+}
+#sndPanel .sndSlider::-moz-range-thumb {
+  width: 13px; height: 20px;
+  border: none;
+  border-radius: 1px;
+  background:
+    repeating-linear-gradient(90deg, rgba(210,200,175,0.2) 0 1px, transparent 1px 3px),
+    linear-gradient(180deg, #55584d, #35372f 46%, #191b16);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.8), 0 0 0 1px rgba(0,0,0,0.75);
+}
+
+#sndPanel .sndVal {
+  flex: 0 0 30px;
+  text-align: right;
+  font-size: 12px;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+  color: #d9a24a;
+  text-shadow: 0 1px 0 rgba(0,0,0,0.9);
+}
+
+#sndPanel .sndRow.mudo .sndVal,
+#sndPanel.silenciado .sndVal { color: rgba(130,126,105,0.5); }
+#sndPanel.silenciado .sndSlider::-webkit-slider-runnable-track {
+  background:
+    repeating-linear-gradient(90deg, transparent 0 9%, rgba(0,0,0,0.5) 9% 10%),
+    linear-gradient(180deg, rgba(0,0,0,0.85), rgba(0,0,0,0.5));
+}
+
+/* --- botones del panel --- */
+#sndPanel .sndBtns {
+  display: flex;
+  gap: 9px;
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(0,0,0,0.65);
+  box-shadow: inset 0 1px 0 rgba(210,200,175,0.06);
+}
+#sndPanel .sndBtns button {
+  flex: 1;
+  padding: 11px 12px;
+  border: none;
+  border-radius: 0;
+  font-family: 'Courier New', monospace;
+  font-size: 10px;
+  font-weight: bold;
+  letter-spacing: 2.4px;
+  cursor: pointer;
+  color: var(--stencil-lo);
+  text-shadow: 0 1px 0 rgba(0,0,0,0.9);
+  clip-path: polygon(0 6px, 7px 0, calc(100% - 3px) 0, 100% 6px,
+                     100% calc(100% - 7px), calc(100% - 8px) 100%, 4px 100%, 0 calc(100% - 4px));
+  background:
+    radial-gradient(ellipse 18px 8px at 6% 90%, rgba(140,68,28,0.38), transparent 72%),
+    linear-gradient(180deg, rgba(255,255,255,0.045), rgba(0,0,0,0.3)),
+    linear-gradient(178deg, var(--steel-hi), var(--steel) 46%, var(--steel-deep));
+  box-shadow:
+    inset 0 1px 0 rgba(210,200,175,0.13),
+    inset 0 -3px 0 rgba(0,0,0,0.85),
+    0 3px 8px rgba(0,0,0,0.6);
+  transition: transform 0.09s ease, filter 0.15s ease;
+}
+#sndPanel .sndBtns button:hover  { transform: translateY(-1px); filter: brightness(1.3); }
+#sndPanel .sndBtns button:active { transform: translateY(2px); filter: brightness(0.74); }
+#sndPanel .sndMute.on {
+  color: #d9a0a0;
+  background:
+    radial-gradient(ellipse 18px 8px at 6% 90%, rgba(140,68,28,0.4), transparent 72%),
+    linear-gradient(180deg, rgba(122,31,31,0.3), rgba(0,0,0,0.3)),
+    linear-gradient(178deg, #443733, #1a1412);
+}
+
+/* botón SONIDO dentro de la pausa */
+#overlay .sndOpenBtn {
+  display: inline-block;
+  margin: 4px 5px;
+  padding: 9px 20px;
+  border: none;
+  border-radius: 0;
+  font-family: 'Courier New', monospace;
+  font-size: 10px;
+  font-weight: bold;
+  letter-spacing: 2.4px;
+  cursor: pointer;
+  color: var(--stencil-lo);
+  text-shadow: 0 1px 0 rgba(0,0,0,0.9);
+  clip-path: polygon(0 6px, 7px 0, calc(100% - 3px) 0, 100% 6px,
+                     100% calc(100% - 7px), calc(100% - 8px) 100%, 4px 100%, 0 calc(100% - 4px));
+  background:
+    radial-gradient(ellipse 18px 8px at 7% 88%, rgba(140,68,28,0.42), transparent 72%),
+    linear-gradient(180deg, rgba(255,255,255,0.04), rgba(0,0,0,0.3)),
+    linear-gradient(178deg, #3d3f36, #191b16);
+  box-shadow:
+    inset 0 1px 0 rgba(210,200,175,0.12),
+    inset 0 -3px 0 rgba(0,0,0,0.85),
+    0 3px 8px rgba(0,0,0,0.6);
+  transition: transform 0.09s ease, filter 0.15s ease;
+}
+#overlay .sndOpenBtn:hover  { transform: translateY(-2px); filter: brightness(1.3); }
+#overlay .sndOpenBtn:active { transform: translateY(3px); filter: brightness(0.72); }
+
+/* ============================================================
+   8.6 · TIENDA + MEJORAS EN UN SOLO PANEL
+   La tienda se corre a un lado; al otro, la columna de mejoras:
+   cartas verticales (huecos), el selector de 3 opciones cuando
+   toca, y una cuenta regresiva cuando no — nunca queda vacío.
+
+   COLOR = RAREZA, sin decirlo con texto:
+     común   -> verde oliva (equipo estándar, el color base del juego)
+     rara    -> ámbar/latón (salvamento poco común)
+     especial-> rojo peligro con franja de riesgo (lo más fuerte)
+   ============================================================ */
+.shopLayout {
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+  width: 100%;
+  max-width: 640px;
+  text-align: left;
+}
+.shopLayout > .shopGrid { flex: 1; max-width: none; margin-bottom: 0; }
+
+.upgSidebar { flex: 1; display: flex; flex-direction: column; gap: 8px; min-width: 190px; }
+.upgSidebarTitle {
+  font-size: 10px; letter-spacing: 2.4px; color: var(--stencil-lo);
+  text-shadow: 0 1px 0 rgba(0,0,0,0.9);
+  padding-bottom: 4px; border-bottom: 1px solid rgba(0,0,0,0.6);
+  box-shadow: 0 1px 0 rgba(210,200,175,0.06);
+}
+
+/* ---- las cartas de huecos: verticales, NO cuadradas ----
+   Grilla de 2 columnas con MÍNIMO 6 casilleros (no 5): así el estado
+   de reposo, antes de elegir nada, es un 2x3 perfecto — cero huecos
+   huérfanos. flex + justify-content:center (no grid) además centra
+   cualquier fila incompleta que aparezca más adelante en partidas muy
+   largas (7, 9, 11 elecciones...), así SIEMPRE queda simétrico, sin
+   importar cuántas mejoras lleve la partida. */
+.upgSlots {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+.upgSlot {
+  position: relative;
+  flex: 0 0 calc(50% - 4px);
+  aspect-ratio: 3 / 4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 5px;
+  padding: 9px 6px 7px;
+  overflow: hidden;
+  clip-path: polygon(0 8px, 8px 0, calc(100% - 4px) 0, 100% 6px,
+                     100% calc(100% - 8px), calc(100% - 6px) 100%, 4px 100%, 0 calc(100% - 4px));
+  animation: upgReveal 0.3s ease-out backwards;
+}
+
+/* vacía: casillero a la espera, sin texto — sólo un socket dibujado */
+.upgSlotEmpty {
+  background:
+    repeating-linear-gradient(115deg, rgba(150,120,40,0.045) 0 6px, transparent 6px 12px),
+    linear-gradient(178deg, rgba(0,0,0,0.32), rgba(0,0,0,0.52));
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06), inset 0 2px 7px rgba(0,0,0,0.5);
+}
+.upgSlotEmpty i {
+  width: 12px; height: 12px;
+  border: 1.5px dashed rgba(150,148,126,0.32);
+  transform: rotate(45deg);
+}
+
+/* llena: chapa con acento de color según rareza (el color, no el texto) */
+.upgSlotFilled {
+  background:
+    linear-gradient(103deg, transparent 30%, rgba(255,255,255,0.045) 30.3%, transparent 30.8%),
+    linear-gradient(180deg, rgba(255,255,255,0.05), rgba(0,0,0,0.32)),
+    linear-gradient(178deg, var(--steel-hi), var(--steel) 46%, var(--steel-deep));
+  box-shadow:
+    inset 0 1px 0 rgba(210,200,175,0.12),
+    inset 0 -2px 0 rgba(0,0,0,0.8),
+    0 2px 6px rgba(0,0,0,0.55),
+    inset 0 0 0 1px var(--upg-c, rgba(124,154,82,0.5));
+}
+.upgSlotBadge {
+  position: absolute; top: 0; left: 0; right: 0; height: 5px;
+  background: var(--upg-c, #7c9a52);
+  box-shadow: 0 0 7px var(--upg-c, #7c9a52);
+  opacity: 0.9;
+}
+
+/* el ícono es el elemento dominante de la carta: grande, teñido con el
+   color de rareza, con un resplandor propio detrás del trazo */
+.upgSlotIcon {
+  width: 30px; height: 30px;
+  color: var(--upg-c, #7c9a52);
+  filter: drop-shadow(0 0 4px var(--upg-c, transparent));
+}
+.upgSlotIcon svg { width: 100%; height: 100%; display: block; }
+
+.upgSlotFilled b {
+  font-size: 10px; line-height: 1.24; color: var(--stencil);
+  text-shadow: 0 1px 0 rgba(0,0,0,0.9);
+}
+.upgSlotFilled span {
+  font-size: 9.5px; font-weight: bold; color: var(--upg-c, #7c9a52);
+  text-shadow: 0 1px 0 rgba(0,0,0,0.85);
+}
+
+.upgSlot[data-rarity="common"]  { --upg-c: #7c9a52; }   /* oliva: equipo estándar */
+.upgSlot[data-rarity="rare"]    { --upg-c: #c98a3a; }   /* latón/ámbar: poco común */
+.upgSlot[data-rarity="special"] { --upg-c: #d9483a; }   /* rojo peligro: lo más fuerte */
+.upgSlot[data-rarity="special"] .upgSlotBadge {
+  background: repeating-linear-gradient(115deg, #d9483a 0 5px, #7a1e12 5px 10px);
+}
+
+/* raras: un resplandor extra sutil que las commons no tienen —
+   suficiente para que el ojo las distinga sin decir "RARA" en ningún lado */
+.upgSlot[data-rarity="rare"] {
+  box-shadow:
+    inset 0 1px 0 rgba(210,200,175,0.12), inset 0 -2px 0 rgba(0,0,0,0.8),
+    0 2px 6px rgba(0,0,0,0.55), inset 0 0 0 1px var(--upg-c),
+    0 0 10px rgba(201,138,58,0.22);
+}
+
+/* especiales: laten despacio — es la reacción de "epa, qué es esto" que
+   se busca. Nada agresivo: un respiro de 2.4s, no un parpadeo */
+.upgSlot[data-rarity="special"] {
+  animation: upgReveal 0.3s ease-out backwards, upgSpecialPulse 2.4s ease-in-out infinite;
+}
+@keyframes upgSpecialPulse {
+  0%, 100% {
+    box-shadow: inset 0 1px 0 rgba(210,200,175,0.12), inset 0 -2px 0 rgba(0,0,0,0.8),
+                0 2px 6px rgba(0,0,0,0.55), inset 0 0 0 1px var(--upg-c),
+                0 0 10px rgba(217,72,58,0.28);
+  }
+  50% {
+    box-shadow: inset 0 1px 0 rgba(210,200,175,0.16), inset 0 -2px 0 rgba(0,0,0,0.8),
+                0 2px 6px rgba(0,0,0,0.55), inset 0 0 0 1.5px var(--upg-c),
+                0 0 20px rgba(217,72,58,0.55);
+  }
+}
+
+/* ---- selector: las 3 opciones ofrecidas, con ícono + barra de color lateral ---- */
+.upgPicker { display: flex; flex-direction: column; gap: 7px; margin-top: 2px; }
+.upgPickerTitle {
+  font-size: 8.5px; letter-spacing: 1.4px; color: #d9a24a;
+  text-shadow: 0 1px 0 rgba(0,0,0,0.9);
+}
+
+.upgOption {
+  position: relative;
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 9px 8px 15px;
+  overflow: hidden;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.04), rgba(0,0,0,0.3)),
+    linear-gradient(178deg, var(--steel), #191c15);
+  box-shadow:
+    inset 0 1px 0 rgba(210,200,175,0.1),
+    inset 0 -2px 0 rgba(0,0,0,0.75),
+    0 2px 6px rgba(0,0,0,0.5),
+    inset 0 0 0 1px var(--upg-c, transparent);
+  animation: upgReveal 0.32s ease-out backwards;
+}
+.upgOptionBar {
+  position: absolute; left: 0; top: 0; bottom: 0; width: 6px;
+  background: var(--upg-c, #7c9a52);
+  box-shadow: 0 0 8px var(--upg-c, #7c9a52);
+}
+.upgOptionIcon {
+  flex-shrink: 0;
+  width: 26px; height: 26px;
+  color: var(--upg-c, #7c9a52);
+  filter: drop-shadow(0 0 3px var(--upg-c, transparent));
+}
+.upgOptionIcon svg { width: 100%; height: 100%; display: block; }
+
+.upgOption[data-rarity="common"]  { --upg-c: #7c9a52; }
+.upgOption[data-rarity="rare"]    { --upg-c: #c98a3a; }
+.upgOption[data-rarity="special"] { --upg-c: #d9483a; }
+.upgOption[data-rarity="rare"] { box-shadow: inset 0 1px 0 rgba(210,200,175,0.1), inset 0 -2px 0 rgba(0,0,0,0.75), 0 2px 6px rgba(0,0,0,0.5), inset 0 0 0 1px var(--upg-c), 0 0 12px rgba(201,138,58,0.2); }
+.upgOption[data-rarity="special"] {
+  box-shadow: inset 0 1px 0 rgba(210,200,175,0.1), inset 0 -2px 0 rgba(0,0,0,0.75), 0 2px 6px rgba(0,0,0,0.5), inset 0 0 0 1px var(--upg-c), 0 0 14px rgba(217,72,58,0.32);
+  animation: upgReveal 0.32s ease-out backwards, upgSpecialPulseRow 2.4s ease-in-out infinite;
+}
+@keyframes upgSpecialPulseRow {
+  0%, 100% { box-shadow: inset 0 1px 0 rgba(210,200,175,0.1), inset 0 -2px 0 rgba(0,0,0,0.75), 0 2px 6px rgba(0,0,0,0.5), inset 0 0 0 1px var(--upg-c), 0 0 14px rgba(217,72,58,0.32); }
+  50%     { box-shadow: inset 0 1px 0 rgba(210,200,175,0.14), inset 0 -2px 0 rgba(0,0,0,0.75), 0 2px 6px rgba(0,0,0,0.5), inset 0 0 0 1.5px var(--upg-c), 0 0 24px rgba(217,72,58,0.6); }
+}
+.upgOption[data-rarity="special"] .upgOptionBar {
+  background: repeating-linear-gradient(180deg, #d9483a 0 5px, #7a1e12 5px 10px);
+}
+
+.upgOptionInfo { flex: 1; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.upgOptionInfo b { font-size: 12px; color: var(--stencil); text-shadow: 0 1px 0 rgba(0,0,0,0.9); }
+.upgOptionInfo span { font-size: 10.5px; color: rgba(207,196,166,0.8); line-height: 1.35; }
+
+/* tarjeta que se "materializa": nace un poco más chica y translúcida */
+@keyframes upgReveal {
+  from { opacity: 0; transform: scale(0.9) translateY(3px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* botón ELEGIR: mismo lenguaje de chapa que el resto del HUD, versión chica */
+.upgPickBtn {
+  flex-shrink: 0;
+  border: none; border-radius: 0;
+  padding: 8px 12px;
+  font-family: 'Courier New', monospace;
+  font-size: 10px; font-weight: bold; letter-spacing: 1px;
+  color: #d9a24a; text-shadow: 0 1px 0 rgba(0,0,0,0.9);
+  cursor: pointer;
+  clip-path: polygon(0 4px, 4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%);
+  background:
+    linear-gradient(180deg, rgba(165,82,42,0.18), rgba(0,0,0,0.3)),
+    linear-gradient(178deg, #3c3527, #1a1610);
+  box-shadow:
+    inset 0 1px 0 rgba(210,190,150,0.14),
+    inset 0 -2px 0 rgba(0,0,0,0.8),
+    0 2px 4px rgba(0,0,0,0.5);
+  transition: transform 0.08s ease, filter 0.14s ease;
+}
+.upgPickBtn:hover  { transform: translateY(-1px); filter: brightness(1.3); }
+.upgPickBtn:active { transform: translateY(2px); filter: brightness(0.75); box-shadow: inset 0 3px 6px rgba(0,0,0,0.85); }
+
+/* ---- relleno: cuenta regresiva cuando esta parada no reparte mejora ---- */
+.upgFiller {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  padding: 10px 6px;
+  margin-top: 2px;
+  background: rgba(0,0,0,0.22);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06);
+}
+.upgFillerStripe {
+  width: 100%; height: 5px;
+  background: repeating-linear-gradient(115deg, rgba(150,120,40,0.35) 0 7px, rgba(20,18,12,0.5) 7px 14px);
+  opacity: 0.7;
+}
+.upgFillerText { display: flex; flex-direction: column; align-items: center; gap: 2px; text-align: center; }
+.upgFillerText b {
+  font-size: 8.5px; letter-spacing: 1.8px; color: rgba(180,178,156,0.75);
+  text-shadow: 0 1px 0 rgba(0,0,0,0.9);
+}
+.upgFillerText span { font-size: 9.5px; font-weight: bold; color: #9db06a; }
+
+@media (pointer: coarse) {
+  .shopLayout { flex-direction: column; }
+  .upgSidebar { min-width: 0; }
+  .upgSlot { flex-basis: calc(33.333% - 6px); }
+}
+
+/* ============================================================
+   9 · MODO TÁCTIL
+   ============================================================ */
+@media (pointer: coarse) {
+  #hud { padding: max(6px, env(safe-area-inset-top)) max(9px, env(safe-area-inset-right)) 5px max(9px, env(safe-area-inset-left)); }
+  #hud::after { height: 5px; margin-top: 4px; }
+  #hudTop > div, #hudMid > div { padding: 4px 8px; font-size: 7.5px; letter-spacing: 1.2px; gap: 5px; }
+  #hudTop .val, #hudMid .val, #hudMid #ammoVal { font-size: 12px; }
+  #weaponVal { font-size: 9px !important; }
+  #healthOuter { height: 18px; padding: 3px 4px; }
+  #healthOuter::before { font-size: 7px; letter-spacing: 2.2px; padding-left: 9px; }
+  #hud #btnPause, #hud #btnSkipWave, #hudTop #btnDevMode { padding: 5px 8px 5px 12px; font-size: 8.5px; letter-spacing: 1.2px; }
+  .termPanel { width: min(480px, 100%); padding: 32px 18px 20px; }
+  #overlay h2 { font-size: 20px; letter-spacing: 6px; }
+
+  /* en táctil se arrastra el contenido, no la barra: se adelgaza
+     para no comerse ancho útil, pero se mantiene visible como
+     indicador de cuánto queda por debajo */
+  #overlay::-webkit-scrollbar,
+  .termPanel::-webkit-scrollbar { width: 8px; }
+  #overlay::-webkit-scrollbar-button,
+  .termPanel::-webkit-scrollbar-button { height: 0; }
+  #overlay::-webkit-scrollbar-thumb,
+  .termPanel::-webkit-scrollbar-thumb { border-width: 1px; }
+
+  /* objetivos de dedo: mínimo cómodo en los botones de compra */
+  #sndPanel .sndCard { width: min(360px, 100%); padding: 18px 16px 14px; }
+  #sndPanel .sndLabel { flex: 0 0 78px; font-size: 9px; }
+  #sndPanel .sndSlider { height: 30px; }             /* franja de dedo más alta */
+  #sndPanel .sndSlider::-webkit-slider-thumb { width: 17px; height: 26px; margin-top: -8px; }
+  #sndPanel .sndBtns button { padding: 14px 12px; }
+  #overlay .sndOpenBtn { padding: 12px 20px; }
+
+  .shopBuyBtn { min-height: 42px; min-width: 62px; padding: 10px 14px; }
+  .shopItem { padding: 10px 11px; gap: 11px; }
+  .shopIcon { width: 42px; height: 42px; }
+}
+
+/* ============================================================
+   10 · MOVIMIENTO REDUCIDO
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  #healthOuter.critical, #healthOuter.hit, #hudMid > div.dry,
+  #hudTop > div.bump, #hudMid > div.bump,
+  #hudTop > div.bump .val, #hudMid > div.bump .val, #hudMid > div.bump #ammoVal,
+  #hudTop #btnDevMode.on::after, .termPanel,
+  .upgSlot, .upgOption { animation: none; }
+  #dmgVignette.show { animation: none; opacity: 0; }
+}
+
+/* ============================================================
+   BOTÓN DE RECARGA MÓVIL
+   ------------------------------------------------------------
+   #btnReloadMobile se añadió con el minijuego de recarga activa
+   pero nunca recibió estilo: salía como un botón blanco del
+   navegador, redondo por la regla de #actionCluster pero sin
+   pintar. Mismo chasis que sus hermanos del cluster, en tono
+   ámbar de munición para que se distinga de un vistazo.
+   ============================================================ */
+#btnReloadMobile {
+  border: none;
+  font-family: inherit;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  color: #e0b45a;
+  text-shadow: 0 1px 0 rgba(0,0,0,0.9);
+  background:
+    radial-gradient(circle at 36% 26%, rgba(255,255,255,0.12), transparent 44%),
+    radial-gradient(circle at 50% 56%, rgba(168,124,40,0.38), rgba(42,32,14,0.95) 76%),
+    linear-gradient(178deg, #38311d, #17130b);
+  box-shadow:
+    inset 0 2px 0 rgba(226,200,150,0.13),
+    inset 0 -4px 8px rgba(0,0,0,0.8),
+    0 4px 10px rgba(0,0,0,0.6),
+    0 0 0 2px rgba(0,0,0,0.5);
+  transition: transform 0.08s ease, filter 0.08s ease;
+}
+#btnReloadMobile:active,
+#btnReloadMobile.pressed { transform: scale(0.92); filter: brightness(0.78); }

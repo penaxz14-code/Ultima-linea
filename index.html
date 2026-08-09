@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>ÚLTIMA LÍNEA</title>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="menu.css">
+<link rel="stylesheet" href="shop.css">
+<link rel="stylesheet" href="hud.css">
+</head>
+<body>
+<div id="wrap">
+  <div id="gameArea">
+    <div id="hud">
+      <div id="hudTop">
+        <div>SCORE <span class="val" id="scoreVal">0</span></div>
+        <div>OLEADA <span class="val" id="waveVal">1</span></div>
+        <button id="btnPause">❚❚ PAUSA</button>
+        <button id="btnSkipWave" title="Adelantar oleada (solo pruebas)">⏭ OLEADA</button>
+      </div>
+      <div id="hudMid">
+        <div>MUNICIÓN <span id="ammoVal">12</span>/<span id="maxAmmoVal">12</span></div>
+        <div>MONEDAS <span id="coinVal" class="val">0</span>¢</div>
+        <div>ARMA <span id="weaponVal" class="val">PISTOLA</span></div>
+      </div>
+      <div id="healthOuter"><div id="healthInner"></div></div>
+
+      <!-- barra del jefe: 3 segmentos, uno por fase. La rellena
+           updateBossHUD() en bosses.js; ui.js recoge los <i> -->
+      <div id="bossBar" class="hidden">
+        <div id="bossBarName">EL ABOMINABLE</div>
+        <div id="bossSegs">
+          <div class="bossSeg"><i></i></div>
+          <div class="bossSeg"><i></i></div>
+          <div class="bossSeg"><i></i></div>
+        </div>
+      </div>
+    </div>
+
+    <canvas id="canvas"></canvas>
+
+    <div id="controls">
+      <div class="moveRow">
+        <button class="movebtn" id="btnLeft">◀</button>
+        <button class="movebtn" id="btnRight">▶</button>
+      </div>
+      <div class="rightControls">
+        <div id="joystickPad"><div id="joystickKnob"></div></div>
+        <button id="btnSwitchWeapon" title="Cambiar arma (Q)">⟲<span id="weaponSwitchLabel">P</span></button>
+        <button id="btnFire">DISPARAR</button>
+        <button id="btnDash" title="Dash (Shift)">DASH</button>
+      </div>
+    </div>
+
+    <div id="touchLayer">
+      <div id="moveZone">
+        <div class="stickBase" id="moveKnobBase"></div>
+        <div class="stickKnob" id="moveKnob"></div>
+      </div>
+      <div id="aimZone">
+        <div class="stickBase" id="aimKnobBase"></div>
+        <div class="stickKnob" id="aimKnob"></div>
+      </div>
+      <div id="actionCluster">
+        <button id="btnDashMobile" title="Dash">DASH</button>
+        <button id="btnSwitchWeaponMobile" title="Cambiar arma">⟲<span id="weaponSwitchLabelMobile">P</span></button>
+      </div>
+    </div>
+
+    <!-- Overlay del juego: pausa, tienda y game over lo reescriben.
+         El botón de adentro sólo existe para que game.js lo encuentre al cargar. -->
+    <div id="overlay" class="hidden"><button type="button" id="startBtn" class="bootStub"></button></div>
+
+    <!-- ====== PANTALLA DE INICIO — capa propia, nunca se destruye ====== -->
+    <div id="menuScreen">
+      <canvas id="menuCanvas" width="1000" height="600"></canvas>
+      <div id="menuVignette"></div>
+
+      <div id="menuUI">
+
+        <div id="logoWrap"><svg id="logoSvg" viewBox="0 0 420 196" aria-label="Última Línea"></svg></div>
+
+        <button type="button" id="btnPlayMain">
+          <span class="plateScan"></span>
+          <span class="plateFace">
+            <span class="plateRow">
+              <svg class="playIcon" viewBox="0 0 24 24" aria-hidden="true"><polygon points="4,2 22,12 4,22"/></svg>
+              <span class="plateLabel">JUGAR</span>
+            </span>
+            <span class="plateSub">INICIAR DESPLIEGUE</span>
+          </span>
+        </button>
+
+        <div class="menuCol" id="menuColLeft">
+          <div class="menuColTitle">EQUIPO</div>
+
+          <button type="button" class="menuBtn" data-mod="Arsenal">
+            <span class="mbIcon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="9" width="15" height="3.4" rx="0.5"/><rect x="15.5" y="7.6" width="6.5" height="2.2" rx="0.5"/><rect x="6" y="12.4" width="2.8" height="6.4" rx="0.6"/><rect x="1.2" y="10.4" width="3.2" height="1.4"/><rect x="11" y="12.4" width="6" height="1.6"/></svg></span>
+            <span class="mbText"><b>ARSENAL</b><i>armas, miras y munición</i></span>
+          </button>
+
+          <button type="button" class="menuBtn" data-mod="Mejoras">
+            <span class="mbIcon"><svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="12,2 21,11.5 16,11.5 16,15.5 8,15.5 8,11.5 3,11.5"/><rect x="8" y="17.5" width="8" height="2.6"/></svg></span>
+            <span class="mbText"><b>MEJORAS</b><i>puntos de mejora permanentes</i></span>
+          </button>
+
+          <button type="button" class="menuBtn" data-mod="El bestiario">
+            <span class="mbIcon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C7.2 2 4 5.4 4 10v3.6L6 16v4h3.2v-2.8h5.6V20H18v-4l2-2.4V10c0-4.6-3.2-8-8-8z"/><rect x="6.6" y="8.6" width="3.6" height="3.6" fill="#12170f"/><rect x="13.8" y="8.6" width="3.6" height="3.6" fill="#12170f"/><rect x="11" y="13.4" width="2" height="2.4" fill="#12170f"/></svg></span>
+            <span class="mbText"><b>BESTIARIO</b><i>fichas de cada infectado</i></span>
+          </button>
+        </div>
+
+        <div class="menuCol" id="menuColRight">
+          <div class="menuColTitle">REGISTRO</div>
+
+          <button type="button" class="menuBtn" data-mod="Logros">
+            <span class="mbIcon"><svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="6,1.5 9.6,1.5 12.4,7.4 8.8,8.8"/><polygon points="18,1.5 14.4,1.5 11.6,7.4 15.2,8.8"/><circle cx="12" cy="15.2" r="6.6"/><circle cx="12" cy="15.2" r="3" fill="#12170f"/></svg></span>
+            <span class="mbText"><b>LOGROS</b><i>medallas y desafíos</i></span>
+          </button>
+
+          <button type="button" class="menuBtn" data-mod="Estadísticas">
+            <span class="mbIcon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="13" width="4.4" height="8.4"/><rect x="9.8" y="8" width="4.4" height="13.4"/><rect x="17.1" y="3.4" width="4.4" height="18"/></svg></span>
+            <span class="mbText"><b>ESTADÍSTICAS</b><i>récords y partidas jugadas</i></span>
+          </button>
+
+          <button type="button" class="menuBtn" data-mod="Ajustes">
+            <span class="mbIcon"><svg viewBox="0 0 24 24" aria-hidden="true"><g><rect x="10.6" y="1.2" width="2.8" height="4.2"/><rect x="10.6" y="18.6" width="2.8" height="4.2"/><rect x="1.2" y="10.6" width="4.2" height="2.8"/><rect x="18.6" y="10.6" width="4.2" height="2.8"/></g><g transform="rotate(45 12 12)"><rect x="10.6" y="1.2" width="2.8" height="4.2"/><rect x="10.6" y="18.6" width="2.8" height="4.2"/><rect x="1.2" y="10.6" width="4.2" height="2.8"/><rect x="18.6" y="10.6" width="4.2" height="2.8"/></g><circle cx="12" cy="12" r="6.4"/><circle cx="12" cy="12" r="2.7" fill="#12170f"/></svg></span>
+            <span class="mbText"><b>AJUSTES</b><i>audio, controles y vídeo</i></span>
+          </button>
+        </div>
+
+        <div id="menuFooter">
+          <button type="button" id="btnToggleHelp" class="linkBtn" onclick="window.__toggleHelp()">▼ más detalles (controles, oleadas, enemigos especiales)</button>
+          <span id="menuVer">v1.0 · PROTOCOLO ÚLTIMA LÍNEA</span>
+        </div>
+
+        <div id="menuToast"></div>
+
+        <div id="helpDetails" class="hidden">
+          <div class="briefCard">
+            <h3>BRIEFING</h3>
+            <p>Muévete con ◀▶. <b>Apunta</b> con el mouse o el joystick ámbar. Pausa con P o el botón ❚❚. La recarga es automática al vaciar el cargador.<br>
+            <span class="h">Cabeza</span>: el primer tiro arranca un pedazo y lo ralentiza; el segundo remata.<br>
+            <span class="b">Cuerpo</span>: le arranca partes, sigue igual de rápido. 3 tiros lo matan.<br>
+            <b>Pies</b>: le vuelas los pies y empieza a arrastrarse, mucho más lento.</p>
+            <p>Gana <span class="c">monedas</span> matando zombies y gástalas en la tienda entre oleadas. Cambia de arma con Q o el botón ⟲ (si compraste más de una). <b>Dash</b> con Shift o el botón DASH: te vuelve invulnerable un instante — se compra en la tienda, listo cada 5s al principio y hasta 3s en oleadas avanzadas.</p>
+            <p>Los zombies aguantan más con cada oleada. Desde la oleada 5 aparecen <b>corredores</b> con casco: más rápidos, y hay que romperles el casco antes de rematarlos en la cabeza. Oleada 10: <b>antidisturbios</b> con escudo y casco — el escudo bloquea el cuerpo (rómpelo a tiros o vuélale los pies). Oleada 15: <b>escupidor</b> — ataca a distancia con ácido, esquívalo moviéndote. Oleada 20: <b>tanque</b> — enorme, inmune a perder los pies, lanza bolas de fuego o ruge, te empuja y te hace daño de cerca, y explota al morir.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+<script src="js/audio.js"></script>
+<script src="js/particles.js"></script>
+<script src="js/pickups.js"></script>
+<script src="js/renderer.js"></script>
+<script src="js/cars.js"></script>
+<script src="js/scenery.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/input.js"></script>
+<script src="js/player.js"></script>
+<script src="js/weapons.js"></script>
+<script src="js/enemies.js"></script>
+<script src="js/bosses.js"></script>
+<script src="js/upgrades.js"></script>
+<script src="js/shop.js"></script>
+<script src="js/dev.js"></script>
+<script src="js/hud.js"></script>
+<script src="js/sound.js"></script>
+<script src="js/bestiary.js"></script>
+<script src="js/game.js"></script>
+<script src="js/menu.js"></script>
+</body>
+</html>

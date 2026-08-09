@@ -1,0 +1,943 @@
+/* ============================================================
+   ÚLTIMA LÍNEA — TIENDA + MEJORAS
+   Se carga DESPUÉS de style.css y menu.css.
+   Todo vive dentro de #overlay.shopMode, dentro de la caja
+   lógica fija de #gameArea (1000x600), así que escala junto
+   con el resto del juego mediante --game-scale.
+   ============================================================ */
+
+:root {
+  /* chapa y acero */
+  --plate-hi:  #262e26;
+  --plate-mid: #19201a;
+  --plate-lo:  #0c100d;
+  --plate-edge: rgba(206,228,196,0.12);
+  --plate-dark: rgba(0,0,0,0.72);
+  --rivet: rgba(255,196,90,0.38);
+
+  /* rarezas */
+  --r-comun:      #9bb08a;
+  --r-rara:       #4d9fee;
+  --r-especial:   #ffb020;
+  --r-epica:      #ff2d4e;
+  --r-legendaria: #b9ff5c;
+}
+
+/* el overlay pasa a ser un bastidor a pantalla completa */
+#overlay.shopMode {
+  padding: 0;
+  display: block;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(125,255,77,0.05), transparent 62%),
+    linear-gradient(180deg, #0a0e0b, #050706);
+}
+
+.shopScreen {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px;
+  font-family: 'Courier New', monospace;
+  color: #c6d2be;
+  text-align: left;
+}
+
+/* trama de monitor de campaña sobre todo el bastidor */
+.shopScreen::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+  background:
+    repeating-linear-gradient(180deg, rgba(0,0,0,0.13) 0 1px, transparent 1px 3px),
+    radial-gradient(ellipse at 50% 45%, transparent 55%, rgba(0,0,0,0.5) 100%);
+}
+
+/* ---- reset de herencias del overlay original ---- */
+#overlay .shopScreen p,
+#overlay .shopScreen h2,
+#overlay .shopScreen h3,
+#overlay .shopScreen h4 {
+  max-width: none;
+  margin: 0;
+  text-shadow: none;
+  color: inherit;
+  font-size: inherit;
+  letter-spacing: inherit;
+  line-height: 1.5;
+}
+#overlay .shopScreen button {
+  font-family: 'Courier New', monospace;
+  cursor: pointer;
+}
+
+/* ============================================================
+   PANEL BASE — chapa remachada
+   ============================================================ */
+.ulPanel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 8px 10px 10px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.045), rgba(0,0,0,0.24) 60%),
+    linear-gradient(180deg, var(--plate-hi), var(--plate-mid) 46%, var(--plate-lo));
+  box-shadow:
+    inset 0 1px 0 var(--plate-edge),
+    inset 0 -2px 0 var(--plate-dark),
+    0 4px 14px rgba(0,0,0,0.55),
+    0 0 0 1px rgba(125,255,77,0.13);
+  clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px);
+}
+
+/* remaches + costura interior */
+.ulPanel::before {
+  content: '';
+  position: absolute;
+  inset: 4px 5px;
+  pointer-events: none;
+  border: 1px dashed rgba(125,255,77,0.09);
+  background:
+    radial-gradient(circle at 4px 4px, var(--rivet) 0 1.5px, transparent 2px),
+    radial-gradient(circle at calc(100% - 4px) 4px, var(--rivet) 0 1.5px, transparent 2px),
+    radial-gradient(circle at 4px calc(100% - 4px), var(--rivet) 0 1.5px, transparent 2px),
+    radial-gradient(circle at calc(100% - 4px) calc(100% - 4px), var(--rivet) 0 1.5px, transparent 2px);
+}
+
+.panelHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+  margin-bottom: 7px;
+}
+#overlay .shopScreen .panelHead h3 {
+  font-size: 10.5px;
+  font-weight: bold;
+  letter-spacing: 3.4px;
+  color: #d8e6cc;
+  white-space: nowrap;
+  text-shadow: 0 1px 0 rgba(0,0,0,0.8);
+}
+.headRule {
+  flex: 1;
+  height: 3px;
+  background:
+    linear-gradient(90deg, transparent, rgba(125,255,77,0.32)),
+    repeating-linear-gradient(90deg, rgba(255,255,255,0.05) 0 2px, transparent 2px 4px);
+  border-bottom: 1px solid rgba(0,0,0,0.6);
+}
+
+/* galones metálicos que flanquean cada título */
+.panelHead .wingSvg {
+  flex: 1;
+  min-width: 0;
+  max-width: 62px;
+  height: 13px;
+  fill: rgba(206,228,196,0.34);
+  filter: drop-shadow(0 1px 0 rgba(0,0,0,0.8));
+}
+.panelHead.big { margin-bottom: 10px; }
+#overlay .shopScreen .panelHead.big h3 {
+  font-size: 21px;
+  letter-spacing: 8px;
+  text-indent: 8px;
+  color: #e6e0c8;
+  text-shadow: 0 2px 0 rgba(0,0,0,0.85), 0 0 18px rgba(232,226,201,0.18);
+}
+.panelHead.big .wingSvg { max-width: 78px; height: 17px; fill: rgba(214,206,180,0.42); }
+.panelBody { flex: 1; min-height: 0; }
+
+/* ============================================================
+   BARRA SUPERIOR
+   ============================================================ */
+.shopBar {
+  position: relative;
+  z-index: 2;
+  flex: 0 0 auto;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 10px;
+  height: 46px;
+  padding: 0 14px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.05), rgba(0,0,0,0.35)),
+    linear-gradient(180deg, #232b23, #10150f);
+  box-shadow:
+    inset 0 1px 0 var(--plate-edge),
+    inset 0 -2px 0 var(--plate-dark),
+    0 3px 12px rgba(0,0,0,0.6),
+    0 0 0 1px rgba(125,255,77,0.16);
+  clip-path: polygon(14px 0, calc(100% - 14px) 0, 100% 100%, 0 100%);
+}
+.barSlot { display: flex; flex-direction: column; justify-content: center; gap: 2px; min-width: 0; }
+.barRight { align-items: flex-end; }
+.barTag {
+  font-size: 8px;
+  letter-spacing: 2.6px;
+  color: rgba(124,154,128,0.75);
+}
+.barSub { font-size: 9.5px; letter-spacing: 1.2px; color: #93a98c; }
+.barCoins {
+  font-size: 19px;
+  font-weight: bold;
+  letter-spacing: 1.5px;
+  color: var(--amber);
+  text-shadow: 0 0 12px rgba(255,176,32,0.45), 0 1px 0 rgba(0,0,0,0.8);
+}
+.barCoins i { font-style: normal; font-size: 12px; opacity: 0.75; margin-left: 1px; }
+
+.barCenter { align-items: center; gap: 0; }
+.barOrn { display: block; height: 16px; margin-bottom: 0; }
+.barOrn .crestSvg { height: 16px; width: 48px; fill: rgba(255,176,32,0.5); }
+
+#overlay .shopScreen .shopTitle {
+  font-size: 17px;
+  font-weight: bold;
+  letter-spacing: 8px;
+  text-indent: 8px;
+  color: #dff0d2;
+  text-shadow: 0 0 14px rgba(125,255,77,0.35), 0 2px 0 rgba(0,0,0,0.75);
+}
+
+/* ============================================================
+   CUERPO — 3 COLUMNAS
+   ============================================================ */
+.shopBody {
+  position: relative;
+  z-index: 2;
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 318px minmax(0, 1fr) 288px;
+  gap: 10px;
+}
+.shopCol { display: flex; flex-direction: column; gap: 8px; min-height: 0; }
+.colLeft .gearPanel { flex: 1; }
+
+/* ---- lista de la tienda ---- */
+.gearList {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-right: 4px;
+}
+.gearList::-webkit-scrollbar { width: 6px; }
+.gearList::-webkit-scrollbar-track { background: rgba(0,0,0,0.4); }
+.gearList::-webkit-scrollbar-thumb { background: rgba(125,255,77,0.22); border: 1px solid rgba(0,0,0,0.6); }
+
+.gearRow {
+  position: relative;
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 9px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.035), rgba(0,0,0,0.2)),
+    linear-gradient(180deg, #202721, #131813);
+  box-shadow:
+    inset 0 1px 0 rgba(206,228,196,0.07),
+    inset 0 -2px 0 rgba(0,0,0,0.55),
+    0 0 0 1px rgba(125,255,77,0.1);
+  clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+}
+.gearRow.maxed { opacity: 0.55; }
+.gearRow.broke .gearIcon { filter: grayscale(0.65) brightness(0.75); }
+
+.gearIcon {
+  width: 38px; height: 38px;
+  display: flex; align-items: center; justify-content: center;
+  background: radial-gradient(circle at 34% 28%, rgba(255,255,255,0.07), rgba(0,0,0,0.4));
+  border: 1px solid rgba(206,228,196,0.14);
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.7);
+}
+.gearIcon svg { width: 26px; height: 26px; }
+
+.gearInfo { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.gearInfo b {
+  font-size: 10.5px;
+  letter-spacing: 1.4px;
+  color: #dfe8d4;
+  text-transform: uppercase;
+}
+.gearInfo span {
+  font-size: 8.6px;
+  letter-spacing: 0.3px;
+  color: rgba(124,154,128,0.9);
+  line-height: 1.35;
+}
+.gearInfo .itemLvl {
+  font-size: 8px;
+  letter-spacing: 1.4px;
+  color: rgba(255,176,32,0.75);
+}
+
+.gearBuy {
+  min-width: 52px;
+  padding: 8px 8px;
+  border: none;
+  font-size: 11px;
+  font-weight: bold;
+  letter-spacing: 0.6px;
+  color: var(--amber);
+  background:
+    linear-gradient(180deg, rgba(255,176,32,0.2), rgba(255,176,32,0.05));
+  box-shadow:
+    inset 0 1px 0 rgba(255,220,150,0.25),
+    inset 0 -2px 0 rgba(0,0,0,0.5),
+    0 0 0 1px rgba(255,176,32,0.5);
+  clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+  transition: transform 0.08s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+.gearBuy:hover:not(:disabled) {
+  background: linear-gradient(180deg, rgba(255,176,32,0.34), rgba(255,176,32,0.1));
+  box-shadow: inset 0 1px 0 rgba(255,220,150,0.3), 0 0 0 1px rgba(255,176,32,0.8), 0 0 14px rgba(255,176,32,0.3);
+}
+.gearBuy:active:not(:disabled) { transform: translateY(1px) scale(0.97); }
+.gearBuy:disabled {
+  color: rgba(124,154,128,0.55);
+  background: rgba(255,255,255,0.03);
+  box-shadow: inset 0 -2px 0 rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.09);
+  cursor: not-allowed;
+}
+
+/* ============================================================
+   COLUMNA CENTRAL — progreso hacia la próxima mejora
+   ============================================================ */
+.centerTop { flex: 0 0 auto; }
+
+.msTrack {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 2px 0;
+}
+.msStep { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.msLink {
+  flex: 1;
+  height: 2px;
+  margin: 0 2px 14px;
+  background: repeating-linear-gradient(90deg, rgba(124,154,128,0.45) 0 5px, transparent 5px 9px);
+}
+.msNode {
+  width: 26px; height: 26px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+  border: 2px solid rgba(124,154,128,0.35);
+  background: radial-gradient(circle at 35% 30%, rgba(255,255,255,0.06), rgba(0,0,0,0.55));
+  box-shadow: inset 0 0 8px rgba(0,0,0,0.8);
+  color: rgba(124,154,128,0.6);
+  font-size: 12px;
+}
+.msDot { width: 5px; height: 5px; border-radius: 50%; background: rgba(124,154,128,0.5); }
+.msNode.done {
+  border-color: rgba(125,255,77,0.75);
+  color: var(--toxic);
+  box-shadow: inset 0 0 8px rgba(0,0,0,0.8), 0 0 10px rgba(125,255,77,0.28);
+}
+.msNode.now {
+  border-color: var(--amber);
+  color: var(--amber);
+  box-shadow: inset 0 0 8px rgba(0,0,0,0.8), 0 0 14px rgba(255,176,32,0.55);
+  animation: msPulse 1.6s ease-in-out infinite;
+}
+.msNode.now .msDot { background: var(--amber); width: 7px; height: 7px; }
+.msNode.boss { border-color: rgba(255,45,78,0.6); color: rgba(255,45,78,0.9); }
+.msNode.boss.done { border-color: rgba(255,45,78,0.9); }
+.msTick { font-size: 13px; line-height: 1; }
+.msSkull { font-size: 13px; line-height: 1; }
+.msNum { font-size: 9px; letter-spacing: 1.4px; color: rgba(124,154,128,0.8); }
+
+@keyframes msPulse {
+  0%, 100% { box-shadow: inset 0 0 8px rgba(0,0,0,0.8), 0 0 10px rgba(255,176,32,0.35); }
+  50%      { box-shadow: inset 0 0 8px rgba(0,0,0,0.8), 0 0 20px rgba(255,176,32,0.7); }
+}
+
+#overlay .shopScreen .msHint {
+  margin-top: 8px;
+  font-size: 9.5px;
+  letter-spacing: 0.6px;
+  text-align: center;
+  color: rgba(124,154,128,0.92);
+}
+#overlay .shopScreen .msHint b { color: var(--amber); font-size: 11px; }
+#overlay .shopScreen .msHint .ready { color: var(--toxic); letter-spacing: 1.2px; }
+
+/* ---- ficha del soldado (oleada sin mejora) ---- */
+.centerIdle { flex: 1; }
+
+.sheetGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  padding: 6px 2px 0;
+}
+.statRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 6px;
+}
+.statLabel {
+  font-size: 8.6px;
+  letter-spacing: 2px;
+  color: rgba(124,154,128,0.85);
+}
+.statVal {
+  font-size: 13px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  text-align: right;
+}
+.statVal i { font-style: normal; font-size: 8.6px; opacity: 0.55; }
+.statVal.hp { color: var(--blood); }
+.statVal.am { color: var(--amber); }
+.statVal.ar { color: var(--toxic); }
+.statVal.sp { color: var(--r-rara); }
+
+.statBar {
+  grid-column: 1 / -1;
+  height: 7px;
+  background: rgba(0,0,0,0.55);
+  box-shadow: inset 0 0 6px rgba(0,0,0,0.9), 0 0 0 1px rgba(255,255,255,0.06);
+  transform: skewX(-16deg);
+  overflow: hidden;
+}
+.statBar i { display: block; height: 100%; }
+.statBar.hp i { background: linear-gradient(90deg, #7a0f1c, #ff2d4e); }
+.statBar.am i { background: linear-gradient(90deg, #6b4a10, #ffb020); }
+.statBar.ar i { background: linear-gradient(90deg, #2f5c22, #7dff4d); }
+.statBar.sp i { background: linear-gradient(90deg, #1d4c78, #4d9fee); }
+
+.sheetTags {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(125,255,77,0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.tagLine { display: grid; grid-template-columns: 64px minmax(0, 1fr); align-items: center; gap: 8px; }
+.tagTitle { font-size: 8px; letter-spacing: 2px; color: rgba(124,154,128,0.7); }
+.tagWrap { display: flex; flex-wrap: wrap; gap: 5px; }
+.tag {
+  padding: 3px 7px;
+  font-size: 8px;
+  letter-spacing: 1.4px;
+  color: rgba(200,214,196,0.8);
+  background: rgba(255,255,255,0.04);
+  box-shadow: inset 0 -1px 0 rgba(0,0,0,0.5), 0 0 0 1px rgba(206,228,196,0.14);
+  clip-path: polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%);
+}
+.tag.on {
+  color: var(--toxic);
+  background: rgba(125,255,77,0.09);
+  box-shadow: inset 0 -1px 0 rgba(0,0,0,0.5), 0 0 0 1px rgba(125,255,77,0.4);
+}
+.tag.off { color: rgba(124,154,128,0.5); }
+
+#overlay .shopScreen .idleText {
+  margin-top: auto;
+  padding-top: 10px;
+  font-size: 8.6px;
+  letter-spacing: 0.8px;
+  text-align: center;
+  color: rgba(124,154,128,0.55);
+}
+
+/* ============================================================
+   CARTAS DE MEJORA
+   ============================================================ */
+.centerChoice { flex: 1; }
+.perkRow {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.perkCard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 6px 8px;
+  overflow: hidden;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.05), rgba(0,0,0,0.3)),
+    linear-gradient(180deg, #212a21, #0e130f);
+  box-shadow:
+    inset 0 1px 0 rgba(206,228,196,0.09),
+    inset 0 -2px 0 rgba(0,0,0,0.6),
+    0 0 0 1px var(--rc, rgba(125,255,77,0.2)),
+    0 0 16px rgba(0,0,0,0.5);
+  clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+  transition: transform 0.14s ease, box-shadow 0.18s ease;
+}
+.perkCard:hover {
+  transform: translateY(-3px);
+  box-shadow:
+    inset 0 1px 0 rgba(206,228,196,0.12),
+    inset 0 -2px 0 rgba(0,0,0,0.6),
+    0 0 0 1px var(--rc),
+    0 0 26px color-mix(in srgb, var(--rc) 35%, transparent);
+}
+
+.cardRarity {
+  align-self: stretch;
+  margin: -8px -6px 0;
+  padding: 4px 0 3px;
+  text-align: center;
+  font-size: 7.6px;
+  font-weight: bold;
+  letter-spacing: 2px;
+  color: var(--rc);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--rc) 26%, transparent), transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--rc) 40%, transparent);
+}
+.cardIcon {
+  width: 48px; height: 48px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--rc);
+  background: radial-gradient(circle at 36% 28%, rgba(255,255,255,0.08), rgba(0,0,0,0.5));
+  border: 1px solid color-mix(in srgb, var(--rc) 35%, transparent);
+  box-shadow: inset 0 0 12px rgba(0,0,0,0.75), 0 0 12px color-mix(in srgb, var(--rc) 20%, transparent);
+}
+.cardIcon svg { width: 31px; height: 31px; fill: currentColor; }
+
+#overlay .shopScreen .cardName {
+  font-size: 9.4px;
+  font-weight: bold;
+  letter-spacing: 1.1px;
+  text-align: center;
+  color: #e2ecd8;
+  line-height: 1.3;
+}
+#overlay .shopScreen .cardEffect {
+  flex: 0 0 auto;
+  align-self: stretch;
+  padding: 5px 4px;
+  font-size: 8.2px;
+  font-weight: bold;
+  letter-spacing: 0.4px;
+  text-align: center;
+  color: var(--rc);
+  line-height: 1.45;
+  background: color-mix(in srgb, var(--rc) 10%, rgba(0,0,0,0.3));
+  border-top: 1px solid color-mix(in srgb, var(--rc) 30%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--rc) 30%, transparent);
+}
+#overlay .shopScreen .cardDesc {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 7.8px;
+  letter-spacing: 0.2px;
+  text-align: center;
+  color: rgba(124,154,128,0.75);
+  line-height: 1.55;
+}
+.cardStack {
+  font-size: 7.6px;
+  letter-spacing: 1px;
+  color: var(--rc);
+  opacity: 0.85;
+}
+
+.cardPick {
+  align-self: stretch;
+  padding: 7px 0;
+  border: none;
+  font-size: 9.6px;
+  font-weight: bold;
+  letter-spacing: 2.2px;
+  color: var(--rc);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--rc) 22%, transparent), rgba(0,0,0,0.25));
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.14),
+    inset 0 -2px 0 rgba(0,0,0,0.55),
+    0 0 0 1px color-mix(in srgb, var(--rc) 55%, transparent);
+  clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+  transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.08s ease;
+}
+.cardPick:hover {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--rc) 40%, transparent), rgba(0,0,0,0.2));
+  box-shadow: 0 0 0 1px var(--rc), 0 0 16px color-mix(in srgb, var(--rc) 45%, transparent);
+}
+.cardPick:active { transform: translateY(1px) scale(0.98); }
+
+#overlay .shopScreen .choiceFoot {
+  flex: 0 0 auto;
+  margin-top: 7px;
+  font-size: 8.4px;
+  letter-spacing: 0.8px;
+  text-align: center;
+  color: rgba(124,154,128,0.6);
+}
+
+/* ---- color por rareza (una sola variable por tarjeta) ---- */
+.r-comun      { --rc: var(--r-comun); }
+.r-rara       { --rc: var(--r-rara); }
+.r-especial   { --rc: var(--r-especial); }
+.r-epica      { --rc: var(--r-epica); }
+.r-legendaria { --rc: var(--r-legendaria); }
+
+/* la legendaria es la única que se permite brillar */
+.perkCard.r-legendaria::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -60%;
+  width: 45%; height: 100%;
+  pointer-events: none;
+  background: linear-gradient(100deg, transparent, rgba(200,255,150,0.18), transparent);
+  animation: legendSweep 3.6s ease-in-out infinite;
+}
+@keyframes legendSweep {
+  0%, 55%   { left: -60%; }
+  90%, 100% { left: 120%; }
+}
+
+/* ============================================================
+   COLUMNA DERECHA — mejoras activas
+   ============================================================ */
+.sideActive { flex: 1; }
+.chipGrid {
+  flex: 0 1 auto;
+  min-height: 0;
+  max-height: 176px;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-content: start;
+  gap: 6px;
+  padding-right: 3px;
+}
+.chipGrid {
+  background-image:
+    linear-gradient(rgba(206,228,196,0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(206,228,196,0.045) 1px, transparent 1px);
+  background-size: 22px 22px;
+  background-position: 1px 1px;
+}
+.chipGrid::-webkit-scrollbar { width: 5px; }
+.chipGrid::-webkit-scrollbar-track { background: rgba(0,0,0,0.4); }
+.chipGrid::-webkit-scrollbar-thumb { background: rgba(125,255,77,0.2); }
+
+.perkChip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 6px 3px 5px;
+  border: none;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.04), rgba(0,0,0,0.28)),
+    linear-gradient(180deg, #1f271f, #10150f);
+  box-shadow:
+    inset 0 1px 0 rgba(206,228,196,0.08),
+    inset 0 -2px 0 rgba(0,0,0,0.55),
+    0 0 0 1px color-mix(in srgb, var(--rc) 45%, transparent);
+  clip-path: polygon(7px 0, 100% 0, 100% calc(100% - 7px), calc(100% - 7px) 100%, 0 100%, 0 7px);
+  transition: transform 0.1s ease, box-shadow 0.15s ease;
+}
+.perkChip:hover { transform: translateY(-2px); }
+.perkChip.sel {
+  box-shadow:
+    inset 0 -2px 0 rgba(0,0,0,0.55),
+    0 0 0 1.5px var(--rc),
+    0 0 14px color-mix(in srgb, var(--rc) 40%, transparent);
+}
+.chipIcon {
+  width: 26px; height: 26px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--rc);
+}
+.chipIcon svg { width: 22px; height: 22px; fill: currentColor; }
+.chipName {
+  font-size: 6.8px;
+  letter-spacing: 0.5px;
+  line-height: 1.2;
+  text-align: center;
+  color: #d3dfc8;
+  max-width: 100%;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.chipLvl {
+  font-size: 7.4px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  color: var(--rc);
+}
+
+/* contador de mejoras conseguidas */
+.perkCount {
+  flex: 0 0 auto;
+  margin-top: 9px;
+  padding: 6px 0 7px;
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-align: center;
+  color: var(--toxic);
+  text-shadow: 0 0 12px rgba(125,255,77,0.4), 0 1px 0 rgba(0,0,0,0.8);
+  border-top: 1px solid rgba(125,255,77,0.14);
+  border-bottom: 1px solid rgba(125,255,77,0.14);
+  background: linear-gradient(180deg, rgba(125,255,77,0.05), transparent);
+}
+.perkCount b { font-size: 15px; font-weight: bold; }
+
+/* emblema de la unidad */
+.crestBox {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px 4px 2px;
+  text-align: center;
+}
+.crestBox .crestSvg {
+  width: 104px;
+  height: 56px;
+  fill: rgba(206,228,196,0.16);
+  filter: drop-shadow(0 2px 0 rgba(0,0,0,0.6));
+}
+.crestBox.small .crestSvg { width: 78px; height: 42px; }
+#overlay .shopScreen .crestBox p {
+  font-size: 8.6px;
+  letter-spacing: 0.8px;
+  line-height: 1.7;
+  color: rgba(124,154,128,0.72);
+}
+
+/* ---- ficha de detalle ---- */
+.sideDetail { flex: 0 0 auto; }
+.detailTop {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+}
+.detailIcon {
+  width: 40px; height: 40px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--rc, var(--r-comun));
+  background: radial-gradient(circle at 34% 28%, rgba(255,255,255,0.07), rgba(0,0,0,0.5));
+  border: 1px solid color-mix(in srgb, var(--rc, var(--r-comun)) 35%, transparent);
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.75);
+}
+.detailIcon svg { width: 26px; height: 26px; fill: currentColor; }
+.detailTitle { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.detailTitle b {
+  font-size: 10px;
+  letter-spacing: 1.2px;
+  color: #e4eeda;
+  line-height: 1.25;
+}
+.detailTitle i {
+  font-style: normal;
+  font-size: 8.2px;
+  letter-spacing: 1.2px;
+  color: rgba(124,154,128,0.85);
+}
+.detailBadge {
+  align-self: flex-start;
+  padding: 3px 6px;
+  font-size: 7px;
+  font-weight: bold;
+  letter-spacing: 1.4px;
+  color: var(--rc, var(--r-comun));
+  border: 1px solid color-mix(in srgb, var(--rc, var(--r-comun)) 50%, transparent);
+  background: color-mix(in srgb, var(--rc, var(--r-comun)) 12%, transparent);
+  clip-path: polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%);
+}
+#overlay .shopScreen .detailDesc {
+  margin-top: 8px;
+  font-size: 8.8px;
+  letter-spacing: 0.2px;
+  line-height: 1.6;
+  color: rgba(124,154,128,0.95);
+}
+.detailEffect {
+  margin-top: 8px;
+  padding: 6px 8px;
+  font-size: 8.6px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  color: var(--rc, var(--r-comun));
+  background: color-mix(in srgb, var(--rc, var(--r-comun)) 9%, rgba(0,0,0,0.35));
+  border-left: 2px solid var(--rc, var(--r-comun));
+}
+#overlay .shopScreen .detailEmpty {
+  padding: 14px 4px;
+  font-size: 8.8px;
+  letter-spacing: 0.6px;
+  text-align: center;
+  color: rgba(124,154,128,0.6);
+}
+
+/* ---- aviso cuando falta js/perks.js ---- */
+.perksMissing {
+  flex: 1;
+  justify-content: center;
+  gap: 10px;
+  box-shadow:
+    inset 0 1px 0 var(--plate-edge),
+    inset 0 -2px 0 var(--plate-dark),
+    0 0 0 1px rgba(255,45,78,0.35),
+    0 0 20px rgba(255,45,78,0.12);
+}
+#overlay .shopScreen .perksMissing p {
+  font-size: 9px;
+  letter-spacing: 0.4px;
+  line-height: 1.7;
+  text-align: center;
+  color: rgba(200,214,196,0.8);
+  padding: 0 6px;
+}
+#overlay .shopScreen .perksMissing p b { color: var(--amber); }
+#overlay .shopScreen .perksMissing .hint { font-size: 8.2px; color: rgba(124,154,128,0.7); }
+
+/* ============================================================
+   PIE
+   ============================================================ */
+.shopFoot {
+  position: relative;
+  overflow: hidden;
+  z-index: 2;
+  flex: 0 0 auto;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 12px;
+  height: 44px;
+  padding: 0 14px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.04), rgba(0,0,0,0.35)),
+    linear-gradient(180deg, #1d241d, #0c100d);
+  box-shadow:
+    inset 0 1px 0 var(--plate-edge),
+    inset 0 -2px 0 var(--plate-dark),
+    0 -2px 10px rgba(0,0,0,0.5),
+    0 0 0 1px rgba(125,255,77,0.14);
+  clip-path: polygon(0 0, 100% 0, calc(100% - 14px) 100%, 14px 100%);
+}
+.shopFoot > .footTip,
+.shopFoot > #shopContinue,
+.shopFoot > .footWarn { position: relative; z-index: 2; }
+
+.footCrest {
+  position: absolute;
+  left: 50%; bottom: -14px;
+  transform: translateX(-50%);
+  width: 300px;
+  z-index: 1;
+  pointer-events: none;
+}
+.footCrest .crestSvg {
+  width: 100%; height: 62px;
+  fill: rgba(206,228,196,0.16);
+}
+
+.footTip {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 8.4px;
+  letter-spacing: 0.5px;
+  line-height: 1.4;
+  color: rgba(124,154,128,0.82);
+}
+.footTip b { color: var(--toxic); letter-spacing: 1px; }
+.tipStar { flex: 0 0 auto; width: 17px; height: 17px; color: var(--toxic); opacity: 0.85; }
+.tipStar svg { width: 100%; height: 100%; fill: currentColor; }
+.footWarn {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 5px;
+  font-size: 8.6px;
+  letter-spacing: 1.2px;
+  color: rgba(255,45,78,0.85);
+}
+.footWarn .skullMark { width: 13px; height: 13px; fill: rgba(255,45,78,0.8); flex: 0 0 auto; }
+
+/* calavera del hito final */
+.msNode .skullMark { width: 15px; height: 15px; fill: currentColor; }
+
+#overlay .shopScreen #shopContinue {
+  padding: 9px 22px;
+  border: none;
+  border-radius: 0;
+  font-size: 11px;
+  font-weight: bold;
+  letter-spacing: 3px;
+  color: #d6ffbc;
+  background:
+    linear-gradient(180deg, rgba(125,255,77,0.2), rgba(125,255,77,0.04) 55%, rgba(0,0,0,0.3)),
+    linear-gradient(180deg, #2b322b, #141a14);
+  text-shadow: 0 0 10px rgba(125,255,77,0.5), 0 1px 0 rgba(0,0,0,0.8);
+  box-shadow:
+    inset 0 1px 0 var(--plate-edge),
+    inset 0 -2px 0 var(--plate-dark),
+    0 0 0 1px rgba(125,255,77,0.4),
+    0 0 18px rgba(125,255,77,0.16);
+  clip-path: polygon(9px 0, calc(100% - 9px) 0, 100% 100%, 0 100%);
+  transition: box-shadow 0.16s ease, transform 0.08s ease, background 0.16s ease;
+}
+#overlay .shopScreen #shopContinue:hover {
+  background:
+    linear-gradient(180deg, rgba(125,255,77,0.32), rgba(125,255,77,0.08) 55%, rgba(0,0,0,0.26)),
+    linear-gradient(180deg, #35402f, #1a221a);
+  box-shadow: 0 0 0 1px rgba(125,255,77,0.75), 0 0 26px rgba(125,255,77,0.35);
+}
+#overlay .shopScreen #shopContinue:active { transform: translateY(2px) scale(0.985); }
+
+/* foco visible para teclado */
+.shopScreen button:focus-visible {
+  outline: 2px solid rgba(255,176,32,0.9);
+  outline-offset: 2px;
+}
+
+/* ============================================================
+   RESPONSIVE — la caja lógica no cambia de tamaño, pero en
+   táctil se agrandan los blancos de golpeo y algunos textos.
+   ============================================================ */
+@media (pointer: coarse) {
+  .gearBuy { min-width: 58px; padding: 11px 8px; font-size: 12px; }
+  .cardPick { padding: 10px 0; font-size: 10.4px; }
+  #overlay .shopScreen #shopContinue { padding: 11px 24px; font-size: 12px; }
+  .perkChip { padding: 8px 3px 7px; }
+  .gearInfo span { font-size: 9px; }
+  .chipName { font-size: 7.4px; }
+  .footTip { font-size: 9px; }
+  .footTip b { display: none; }
+}
+
+/* pantallas angostas: la ficha de detalle se compacta */
+@media (max-height: 620px) and (pointer: coarse) {
+  #overlay .shopScreen .detailDesc { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .msNode.now,
+  .perkCard.r-legendaria::after { animation: none; }
+  .perkCard, .perkChip, .gearBuy, .cardPick { transition: none; }
+}
